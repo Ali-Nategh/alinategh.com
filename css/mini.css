@@ -1,0 +1,11 @@
+/* mini Ali: the pixel character that lives at the edge of the page (js/mini.js) */
+/* mini me: a pixel character that lives in the side margins, behind the page content */
+#mini{position:fixed; left:0; top:0; z-index:0; pointer-events:none; will-change:transform}
+#mini canvas{position:absolute; left:0; top:0; display:block; image-rendering:pixelated; image-rendering:crisp-edges}
+#mini .mini-shadow{position:absolute; border-radius:50%; background:radial-gradient(closest-side, rgba(0,0,0,.38), rgba(0,0,0,0)); pointer-events:none}
+#mini .mini-hit{position:absolute; pointer-events:auto; background:transparent; border:0; padding:0; margin:0; cursor:pointer; border-radius:10px; -webkit-tap-highlight-color:transparent}
+#mini .mini-hit:focus-visible{outline:2px dashed var(--accent); outline-offset:3px}
+#mini .mini-bubble{position:absolute; white-space:nowrap; font:600 12px/1 var(--mono); color:var(--text); background:var(--panel-solid); border:2px solid var(--accent);
+  padding:7px 10px; box-shadow:3px 3px 0 color-mix(in srgb, var(--accent) 35%, transparent); animation:mini-pop .2s steps(3) both}
+@keyframes mini-pop{from{transform:scale(.5); opacity:0}}
+@media (max-width:899px){ #mini{z-index:4} }

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /deploy/
+Disallow: /tools/
+
+Sitemap: https://alinategh.com/sitemap.xml

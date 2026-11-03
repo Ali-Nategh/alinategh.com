@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ali Nategh | Software Engineer</title>
+<meta name="description" content="Ali Nategh, software engineer in Toronto. Full-stack apps and HTTP APIs with TypeScript, Node.js, C#/.NET and SQL Server. Previously built Mergify, a Shopify app, at BarAI.">
+<meta name="theme-color" content="#0a1124">
+<link rel="canonical" href="https://alinategh.com/">
+
+<!-- link previews (LinkedIn, iMessage, WhatsApp, Slack, X) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ali Nategh">
+<meta property="og:title" content="Ali Nategh | Software Engineer">
+<meta property="og:description" content="Ali Nategh, software engineer in Toronto. Full-stack apps and HTTP APIs with TypeScript, Node.js, C#/.NET and SQL Server. Previously built Mergify, a Shopify app, at BarAI.">
+<meta property="og:url" content="https://alinategh.com/">
+<meta property="og:image" content="https://alinategh.com/assets/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ali Nategh, Software Engineer. Full-stack and HTTP APIs with TypeScript, Node.js, C#/.NET and SQL Server.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://alinategh.com/assets/og-image.jpg">
+
+<link rel="icon" type="image/png" sizes="192x192" id="favIcon" data-variant="brass" href="assets/icons/brass-192.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" sizes="180x180" id="favTouch" data-variant="brass" href="assets/icons/brass-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Music&display=swap">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Person","name":"Ali Nategh","jobTitle":"Software Engineer","address":{"@type":"PostalAddress","addressLocality":"Toronto","addressRegion":"ON","addressCountry":"CA"},"alumniOf":{"@type":"CollegeOrUniversity","name":"York University"},"sameAs":["https://www.linkedin.com/in/alinategh","https://github.com/Ali-Nategh"],"knowsAbout":["TypeScript","JavaScript","Node.js","Express.js","C#",".NET","ASP.NET Core","SQL Server","PostgreSQL","MongoDB","Redis","GraphQL","Docker","AWS","Java","Python"]}
+</script>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/mini.css">
+<script src="js/app.js" defer></script>
+<script src="js/bitnotes.js" defer></script>
+<script src="js/mini.js" defer></script>
+</head>
+<body>
+<noscript><p style="padding:24px;font-family:monospace">This site is built with JavaScript. Please enable it, or reach Ali at AliNategh005@gmail.com.</p></noscript>
+<!-- ================= HOME ================= -->
+<main id="home" class="wrap">
+  <header class="topbar" id="topbar"></header>
+  <section class="hero" id="top">
+    <div class="glass glow" id="heroMain"></div>
+    <div class="glass signal">
+      <div class="term-chrome"><span class="title">~/signal</span><span class="title" style="margin-left:auto">drag to spin</span></div>
+      <canvas id="sphere" role="img" aria-label="Interactive 3D sphere of points with the technologies Ali works with orbiting it. It pulses when piano notes are played."></canvas>
+      <div class="signal-foot"><span><b>●</b> live</span><span>play the piano below and watch it react</span></div>
+    </div>
+  </section>
+  <div id="sections" style="display:grid;gap:28px"></div>
+  <footer class="foot" id="footer"></footer>
+</main>
+
+<!-- ================= STUDIO ================= -->
+<main id="studio" class="wrap" hidden>
+  <header class="topbar" id="studioTop"></header>
+  <section class="studio-hero" id="studioHero"></section>
+  <section class="inst-row" id="instRow" aria-label="Instruments"></section>
+  <section class="glass sheet-card" aria-label="Sheet music editor">
+    <div class="toolbar" role="toolbar" aria-label="Sheet tools">
+      <div class="tgroup">
+        <button class="tb play" type="button" id="sPlay">▶ play</button>
+        <button class="tb" type="button" id="sLoop" aria-pressed="false" title="Loop">⟲ loop</button>
+      </div>
+      <div class="tgroup" role="group" aria-label="Note or rest">
+        <button class="tb" type="button" data-mode="note" aria-pressed="true" title="Note (N)">note</button>
+        <button class="tb" type="button" data-mode="rest" aria-pressed="false" title="Rest (R)">rest</button>
+        <button class="tb" type="button" id="sChord" aria-pressed="false" title="Chord mode (C): stack notes on the selected one. Or hold Shift.">+ chord</button>
+      </div>
+      <div class="tgroup" role="group" aria-label="Duration" id="durGroup"></div>
+      <div class="tgroup" role="group" aria-label="Accidental">
+        <button class="tb" type="button" data-acc="0" aria-pressed="true" title="Natural (0)"><span class="mus">♮</span></button>
+        <button class="tb" type="button" data-acc="1" aria-pressed="false" title="Sharp (+)"><span class="mus">♯</span></button>
+        <button class="tb" type="button" data-acc="-1" aria-pressed="false" title="Flat (-)"><span class="mus">♭</span></button>
+      </div>
+      <div class="tgroup">
+        <button class="tb" type="button" id="sUndo" title="Undo (Ctrl+Z)">↶ undo</button>
+        <button class="tb" type="button" id="sDel" title="Delete selected (Backspace)">⌫ delete</button>
+        <button class="tb" type="button" id="sClear" title="Remove every note">clear</button>
+      </div>
+      <div class="tgroup">
+        <label for="sTempo">tempo <input type="range" id="sTempo" min="40" max="200" step="2" value="92"><span class="tempo-read" id="sTempoRead">92</span></label>
+        <label for="sTime">time <select id="sTime"><option value="4/4">4/4</option><option value="3/4">3/4</option><option value="2/4">2/4</option><option value="3/8">3/8</option><option value="6/8">6/8</option></select></label>
+      </div>
+      <div class="tgroup">
+        <button class="tb" type="button" id="sNew">+ new</button>
+        <button class="tb" type="button" id="sSave">save</button>
+      </div>
+    </div>
+    <div class="paper" id="paper">
+      <input id="sTitle" class="s-title" placeholder="Untitled" aria-label="Sheet title" maxlength="80">
+      <div class="s-meta">
+        <span class="tm" aria-label="Tempo">♩ = <b id="sTempoMeta">92</b></span>
+        <label class="s-by" for="sComposer">by <input id="sComposer" placeholder="your name" aria-label="Composer name" maxlength="60"></label>
+      </div>
+      <div class="svg-wrap"><svg id="sheetSvg" aria-label="Sheet music staff. Click to add notes."></svg></div>
+      <p class="example-tag" id="exampleTag" hidden>This is an example sheet. Edit it, or <button type="button" id="exampleNew">start a blank one</button>.</p>
+    </div>
+    <div class="s-status"><span id="sInfo"></span><span id="sSaved"></span></div>
+    <div class="s-keys-wrap"><div class="s-keys" id="sKeys" aria-label="Keyboard: click a key to write that note"></div></div>
+    <p class="hint">Keys: <kbd>A</kbd>–<kbd>'</kbd> white notes, <kbd>W</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>Y</kbd> <kbd>U</kbd> <kbd>O</kbd> <kbd>P</kbd> black notes · <kbd>1</kbd>–<kbd>5</kbd> whole to sixteenth · <kbd>.</kbd> dot · <kbd>R</kbd> add rest · <kbd>C</kbd> chord mode, or hold <kbd>Shift</kbd> while adding a note to stack it on the selected one · <kbd>Shift</kbd>+<kbd>↑</kbd><kbd>↓</kbd> move one chord note · <kbd>↑</kbd><kbd>↓</kbd> pitch · <kbd>←</kbd><kbd>→</kbd> select · <kbd>Space</kbd> play</p>
+  </section>
+  <section class="glass sheets" aria-label="Sheet library">
+    <div class="sheets-head"><div id="libHead"></div></div>
+    <ul class="sheet-list lib-list" id="libList"></ul>
+  </section>
+  <section class="glass sheets" aria-label="Saved sheets">
+    <div class="sheets-head"><div><div id="sheetsTitle"></div><p id="sheetsWhere">Saved in this browser.</p></div></div>
+    <ul class="sheet-list" id="sheetList"></ul>
+  </section>
+</main>
+
+<!-- ================= OVERLAYS ================= -->
+<div class="tty" id="tty" hidden role="dialog" aria-modal="true" aria-label="Interactive terminal">
+  <div class="tty-win">
+    <div class="term-chrome"><div class="lights" aria-hidden="true"><i></i><i></i><i></i></div><span class="title" id="ttyTitle">ali@dev — zsh</span><button class="tty-close" type="button" id="ttyClose">esc</button></div>
+    <div class="tty-out" id="ttyOut"></div>
+    <label class="tty-in"><span class="prompt" id="ttyPrompt"></span><input id="ttyIn" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal command"></label>
+  </div>
+</div>
+<div class="adm-bar" id="admBar" hidden role="region" aria-label="Site editor">
+  <span class="rec" aria-hidden="true"></span><b>Editing</b><span class="state" id="admState">no changes</span><span class="sp"></span>
+  <button class="btn" type="button" id="admPage" title="Switch which page you are editing">studio page →</button>
+  <button class="btn" type="button" id="admTty" title="Edit terminal commands">⌨<span class="lbl"> terminal</span></button>
+  <button class="btn" type="button" id="admUndo" title="Undo last change">↶<span class="lbl"> undo</span></button>
+  <button class="btn" type="button" id="admPanelBtn">☰<span class="lbl"> panel</span></button>
+  <button class="btn" type="button" id="admDiscard">discard</button>
+  <button class="btn primary" type="button" id="admSave">save</button>
+  <button class="btn" type="button" id="admDone">done</button>
+</div>
+<div class="adm-confirm" id="admConfirm" hidden><span>You have unsaved changes.</span><button class="btn primary" type="button" id="cSave">save &amp; exit</button><button class="btn" type="button" id="cDiscard">discard</button><button class="btn" type="button" id="cCancel">keep editing</button></div>
+<aside class="adm-panel" id="admPanel" hidden aria-label="Editor panel">
+  <div class="panel-head">
+    <div class="tabs" role="tablist"><button type="button" role="tab" data-tab="site" aria-selected="true">Site</button><button type="button" role="tab" data-tab="sections" aria-selected="false">Sections</button><button type="button" role="tab" data-tab="item" aria-selected="false">Item</button><button type="button" role="tab" data-tab="tty" aria-selected="false">Terminal</button></div>
+    <button class="panel-x" type="button" id="panelX" aria-label="Close panel">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</aside>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+<div class="theme-menu" id="themeMenu" role="menu" aria-label="Colour theme" hidden></div>
+<div class="toast" id="toast" hidden role="status"><span id="toastMsg"></span><button type="button" id="toastAct" hidden></button></div>
+</body>
+</html>

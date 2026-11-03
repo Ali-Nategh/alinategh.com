@@ -1,0 +1,9 @@
+# fonts downloaded for the asset scripts (tools/)
+tools/fonts/
+tools/favicon-preview.png
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/

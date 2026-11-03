@@ -1,0 +1,2695 @@
+{
+  "v": 1,
+  "theme": "navy",
+  "favicon": "brass",
+  "mini": {
+    "on": "yes",
+    "hair": "dark brown",
+    "skin": "light-medium",
+    "shirt": "cream",
+    "glasses": "no",
+    "beard": "mustache & goatee"
+  },
+  "site": {
+    "first": "Ali",
+    "last": "Nategh",
+    "initials": "AN",
+    "tagline": "software engineer · toronto",
+    "status": "open to work",
+    "statusLong": "full-stack · HTTP APIs · GTA",
+    "location": "Toronto, ON, Canada",
+    "school": "BCS · York University 2026",
+    "email": "AliNategh005@gmail.com"
+  },
+  "hero": {
+    "cmd": "whoami",
+    "bio": "Software engineer in Toronto building *full-stack apps and HTTP APIs* with *TypeScript, Node.js and C#/.NET* on SQL Server. At BarAI I built and ran Mergify, a Shopify app rated 4.6/5. Off the clock, I write music at a *piano*."
+  },
+  "order": [
+    {
+      "id": "music",
+      "on": true
+    },
+    {
+      "id": "experience",
+      "on": true
+    },
+    {
+      "id": "stack",
+      "on": true
+    },
+    {
+      "id": "projects",
+      "on": true
+    },
+    {
+      "id": "education",
+      "on": true
+    },
+    {
+      "id": "certs",
+      "on": true
+    },
+    {
+      "id": "contact",
+      "on": true
+    }
+  ],
+  "projects": {
+    "eyebrow": "selected work",
+    "title": "Projects.",
+    "intro": "From production SaaS to coursework. Each one taught me something I still use.",
+    "items": [
+      {
+        "id": "p1",
+        "title": "Mergify",
+        "sub": "Shopify SaaS · BarAI · 2023 – 2025",
+        "status": "live",
+        "size": "wide",
+        "desc": "A Shopify-integrated app that merges orders automatically so merchants save on shipping. I built production features end to end, moved its Shopify integration from REST to GraphQL for 30% faster fetches, and shipped the undo-merge feature merchants asked for most.",
+        "tags": [
+          "Node.js",
+          "Express.js",
+          "MongoDB",
+          "BullMQ",
+          "GraphQL",
+          "AWS",
+          "Docker"
+        ],
+        "url": "https://apps.shopify.com/bestapper-mergify",
+        "linkLabel": "view on the Shopify App Store",
+        "detail": "flow",
+        "flow": [
+          "Shopify webhook",
+          "Express API",
+          "BullMQ queue",
+          "Workers",
+          "MongoDB"
+        ],
+        "ledger": []
+      },
+      {
+        "id": "p2",
+        "title": "ZibaEats + Todo CRUD",
+        "sub": ".NET backends · 2026 · in progress",
+        "status": "building",
+        "size": "wide",
+        "desc": "Two .NET applications: a CRUD Todo app and the backend of ZibaEats, an e-commerce concept. HTTP endpoints with ASP.NET Core Minimal APIs, data in SQL Server through Entity Framework, organised as vertical slices with CQRS and unit tests alongside each feature.",
+        "tags": [
+          "C#",
+          ".NET",
+          "Minimal APIs",
+          "Entity Framework",
+          "SQL Server",
+          "Vertical Slice",
+          "CQRS"
+        ],
+        "url": "",
+        "linkLabel": "",
+        "detail": "flow",
+        "flow": [
+          "POST /orders",
+          "PlaceOrder.Command",
+          "Validator",
+          "Handler",
+          "EF Core",
+          "SQL Server"
+        ],
+        "ledger": []
+      },
+      {
+        "id": "p3",
+        "title": "MyTones",
+        "sub": "Music streaming backend · 2022 – 2023",
+        "status": "shipped",
+        "size": "wide",
+        "desc": "A production-grade HTTP/REST API with 25+ endpoints written without a framework: JWT authentication, role-based authorization, a PostgreSQL schema through Prisma, and Redis caching. Three services run in Docker Compose behind Nginx, deployed by GitHub Actions and documented in Swagger.",
+        "tags": [
+          "TypeScript",
+          "Node.js",
+          "PostgreSQL",
+          "Prisma",
+          "Redis",
+          "Docker",
+          "Nginx",
+          "GitHub Actions",
+          "Swagger"
+        ],
+        "url": "",
+        "linkLabel": "",
+        "detail": "flow",
+        "flow": [
+          "Client",
+          "Nginx",
+          "API · 25+ endpoints",
+          "Redis cache",
+          "PostgreSQL"
+        ],
+        "ledger": []
+      },
+      {
+        "id": "p4",
+        "title": "FXLedger",
+        "sub": "Payments & ledger · .NET · planned",
+        "status": "designing",
+        "size": "wide",
+        "desc": "FX quotes, payments and a double-entry ledger where every transfer writes balanced entries, so the books can be checked at any point in time.",
+        "tags": [
+          "C#",
+          "SQL Server",
+          "Transactions",
+          "Idempotency"
+        ],
+        "url": "",
+        "linkLabel": "",
+        "detail": "ledger",
+        "flow": [],
+        "ledger": [
+          [
+            "customer:cad",
+            "1000",
+            ""
+          ],
+          [
+            "fx:clearing",
+            "",
+            "1000"
+          ]
+        ]
+      },
+      {
+        "id": "p5",
+        "title": "MarketMate",
+        "sub": "AI chatbot · NSBE Hacks 3rd place · Feb 2025",
+        "status": "shipped",
+        "size": "wide",
+        "desc": "I led a team of four to build an AI chatbot that helps people price and negotiate marketplace listings. I owned the requirements, the backend API integration and the coordination, and we placed 3rd.",
+        "tags": [
+          "Cohere AI",
+          "JavaScript",
+          "Express.js",
+          "React"
+        ],
+        "url": "",
+        "linkLabel": "",
+        "detail": "none",
+        "flow": [],
+        "ledger": []
+      },
+      {
+        "id": "p6",
+        "title": "3D Rendering Engine",
+        "sub": "Animation & rendering · Jan 2025",
+        "status": "shipped",
+        "size": "wide",
+        "desc": "A 3D rendering pipeline that draws 1,000+ polygons at 60 FPS, with vertex processing, rasterization, fragment shading, matrix transformations and Phong lighting.",
+        "tags": [
+          "JavaScript",
+          "WebGL",
+          "Linear algebra"
+        ],
+        "url": "",
+        "linkLabel": "",
+        "detail": "flow",
+        "flow": [
+          "Vertices",
+          "Matrix transforms",
+          "Rasterize",
+          "Phong shading",
+          "60 FPS"
+        ],
+        "ledger": []
+      },
+      {
+        "id": "p7",
+        "title": "OS Simulation",
+        "sub": "Scheduling & memory · Feb 2026",
+        "status": "shipped",
+        "size": "normal",
+        "desc": "An operating system simulation that compares 4 CPU scheduling algorithms across 100+ simulated processes, measuring efficiency and resource-allocation trade-offs.",
+        "tags": [
+          "C",
+          "Linux",
+          "Algorithms",
+          "Memory management"
+        ],
+        "url": "",
+        "linkLabel": "",
+        "detail": "none",
+        "flow": [],
+        "ledger": []
+      },
+      {
+        "id": "p8",
+        "title": "Java Projects",
+        "sub": "Spring Boot Todo · Othello · coursework & personal",
+        "status": "shipped",
+        "size": "normal",
+        "desc": "A Todo CRUD app in Java and Spring Boot, plus an Othello game and a command-line library-management system built with classes, abstraction and inheritance.",
+        "tags": [
+          "Java",
+          "Spring Boot",
+          "OOP"
+        ],
+        "url": "",
+        "linkLabel": "",
+        "detail": "none",
+        "flow": [],
+        "ledger": []
+      },
+      {
+        "id": "p9",
+        "title": "Django & Flask APIs",
+        "sub": "Todo backends · personal",
+        "status": "shipped",
+        "size": "normal",
+        "desc": "Todo CRUD REST API backends built twice, once in Django and once in Flask, with create, read, update and delete endpoints in Python.",
+        "tags": [
+          "Python",
+          "Django",
+          "Flask",
+          "REST"
+        ],
+        "url": "",
+        "linkLabel": "",
+        "detail": "none",
+        "flow": [],
+        "ledger": []
+      },
+      {
+        "id": "p10",
+        "title": "AllinServer",
+        "sub": "Self-hosted infra",
+        "status": "live",
+        "size": "wide",
+        "desc": "My own Ubuntu server on Oracle Cloud in Toronto. Hardened, Dockerised, and fronted by Nginx. This site is served from it.",
+        "tags": [
+          "Linux",
+          "Docker",
+          "Nginx",
+          "OCI"
+        ],
+        "url": "",
+        "linkLabel": "",
+        "detail": "none",
+        "flow": [],
+        "ledger": []
+      },
+      {
+        "id": "p11",
+        "title": "Abanico Dance",
+        "sub": "Client work · website",
+        "status": "live",
+        "size": "wide",
+        "desc": "Maintaining and improving the website for a Toronto-area dance studio, from fixes and performance to new pages for its upcoming café.",
+        "tags": [
+          "Web",
+          "SEO",
+          "Performance"
+        ],
+        "url": "https://abanicodance.com",
+        "linkLabel": "visit abanicodance.com",
+        "detail": "none",
+        "flow": [],
+        "ledger": []
+      }
+    ]
+  },
+  "experience": {
+    "eyebrow": "professional experience",
+    "title": "Experience.",
+    "items": [
+      {
+        "id": "e1",
+        "role": "Software Engineer",
+        "org": "BarAI (startup)",
+        "when": "Mar 2023 — Apr 2025 · remote",
+        "desc": "Mergify, a Shopify-integrated SaaS app for automated order merging.",
+        "bullets": [
+          "Built and maintained production parts of Mergify: HTTP/REST APIs in Node.js (Express.js) and React front-end work, backed by Mocha/Chai unit tests and code reviews.",
+          "Cut Shopify fetch time by 30% by moving 16+ functions from its REST API to GraphQL, including currency conversion for order data.",
+          "Implemented BullMQ job queues handling 100+ concurrent jobs, with worker orchestration that prevents race conditions in order processing.",
+          "Built the fault-tolerant undo-merge feature, walking order trees backwards to restore original states, which helped the app reach 4.6/5 on the Shopify App Store.",
+          "Worked across SQL Server and MongoDB (Mongoose), and migrated services to AWS on EC2, S3 and Elastic Load Balancing.",
+          "Handled on-call production support and incident analysis, completed 130+ user stories at a 90%+ rate in biweekly sprints, and wrote 1,900+ lines of API, schema and architecture docs."
+        ]
+      },
+      {
+        "id": "e2",
+        "role": "Web Developer",
+        "org": "Abanico Dance Studio",
+        "when": "2026 — present",
+        "desc": "I keep the studio's site fast, accurate and easy to update, and I'm building out its online presence as the studio opens a café. I also perform with the studio's company on stage.",
+        "bullets": []
+      }
+    ]
+  },
+  "education": {
+    "eyebrow": "education",
+    "title": "Education.",
+    "items": [
+      {
+        "id": "d1",
+        "role": "Bachelor of Computer Science",
+        "org": "York University",
+        "when": "2026 · Toronto, ON",
+        "desc": "Selected coursework and grades:",
+        "bullets": [],
+        "courses": [
+          [
+            "Design and Analysis of Algorithms",
+            "A"
+          ],
+          [
+            "Software Design",
+            "A"
+          ],
+          [
+            "Professional Practice in Computing",
+            "A"
+          ],
+          [
+            "Introduction to Computer Security",
+            "B"
+          ],
+          [
+            "Introduction to AI and Logic Programming",
+            "B"
+          ],
+          [
+            "Introduction to 3D Computer Graphics",
+            "B"
+          ],
+          [
+            "Operating System Fundamentals",
+            "C+"
+          ],
+          [
+            "Advanced Object-Oriented Programming",
+            "A"
+          ],
+          [
+            "Software Tools",
+            "A"
+          ],
+          [
+            "Computer Organization",
+            "A"
+          ],
+          [
+            "Elementary Probability",
+            "A"
+          ],
+          [
+            "Introduction to the Theory of Computation",
+            "B"
+          ],
+          [
+            "Introductory Marketing",
+            "B"
+          ],
+          [
+            "Fundamentals of Data Structures",
+            "D+"
+          ],
+          [
+            "Introduction to Object-Oriented Programming",
+            "A"
+          ],
+          [
+            "Introduction to Logic for Computer Science",
+            "A"
+          ],
+          [
+            "Reasoning About Morality and Values",
+            "A+"
+          ],
+          [
+            "Discrete Math for Computer Science",
+            "B"
+          ],
+          [
+            "Research Directions in Computing",
+            "P"
+          ]
+        ]
+      }
+    ]
+  },
+  "certs": {
+    "eyebrow": "certifications & awards",
+    "title": "Certifications.",
+    "items": [
+      {
+        "id": "c1",
+        "badge": "A+",
+        "title": "CompTIA A+",
+        "issuer": "CompTIA",
+        "when": "",
+        "note": "Hardware, operating systems, troubleshooting and IT support fundamentals."
+      },
+      {
+        "id": "c2",
+        "badge": "N+",
+        "title": "CompTIA Network+",
+        "issuer": "CompTIA",
+        "when": "",
+        "note": "Networking concepts, infrastructure, network operations and security."
+      },
+      {
+        "id": "c3",
+        "badge": "★",
+        "title": "Student Excellence Bursary Award",
+        "issuer": "York University",
+        "when": "",
+        "note": "Awarded for academic standing, with a 3.2+ GPA requirement."
+      }
+    ]
+  },
+  "stack": {
+    "eyebrow": "technical skills",
+    "title": "What I work with.",
+    "intro": "Grouped the way I use them, from the language up to the server it runs on.",
+    "groups": [
+      {
+        "id": "g1",
+        "name": "Languages",
+        "items": [
+          [
+            "TypeScript",
+            ""
+          ],
+          [
+            "JavaScript",
+            ""
+          ],
+          [
+            "C#",
+            ""
+          ],
+          [
+            "SQL",
+            ""
+          ],
+          [
+            "Java",
+            ""
+          ],
+          [
+            "Python",
+            ""
+          ],
+          [
+            "C",
+            ""
+          ],
+          [
+            "HTML / CSS",
+            ""
+          ]
+        ]
+      },
+      {
+        "id": "g2",
+        "name": "HTTP APIs & Backend",
+        "items": [
+          [
+            "Node.js",
+            ""
+          ],
+          [
+            "Express.js",
+            ""
+          ],
+          [
+            "ASP.NET Core",
+            ""
+          ],
+          [
+            "Minimal APIs",
+            ""
+          ],
+          [
+            "ASP.NET MVC",
+            ""
+          ],
+          [
+            "Blazor",
+            ""
+          ],
+          [
+            "REST & HTTP APIs",
+            ""
+          ],
+          [
+            "GraphQL",
+            ""
+          ],
+          [
+            "JWT auth",
+            ""
+          ],
+          [
+            "Webhooks",
+            ""
+          ],
+          [
+            "Spring Boot",
+            ""
+          ],
+          [
+            "Django",
+            ""
+          ],
+          [
+            "Flask",
+            ""
+          ]
+        ]
+      },
+      {
+        "id": "g3",
+        "name": "Databases",
+        "items": [
+          [
+            "SQL Server",
+            ""
+          ],
+          [
+            "PostgreSQL",
+            ""
+          ],
+          [
+            "MongoDB",
+            ""
+          ],
+          [
+            "Mongoose",
+            ""
+          ],
+          [
+            "Redis",
+            ""
+          ],
+          [
+            "Entity Framework",
+            ""
+          ],
+          [
+            "Prisma",
+            ""
+          ],
+          [
+            "Schema design",
+            ""
+          ]
+        ]
+      },
+      {
+        "id": "g4",
+        "name": "Architecture & Patterns",
+        "items": [
+          [
+            "SOLID",
+            ""
+          ],
+          [
+            "MVC",
+            ""
+          ],
+          [
+            "Vertical Slice",
+            ""
+          ],
+          [
+            "CQRS",
+            ""
+          ],
+          [
+            "Dependency Injection",
+            ""
+          ],
+          [
+            "Factory",
+            ""
+          ],
+          [
+            "Singleton",
+            ""
+          ],
+          [
+            "Separation of concerns",
+            ""
+          ]
+        ]
+      },
+      {
+        "id": "g5",
+        "name": "Practices",
+        "items": [
+          [
+            "Agile / Scrum",
+            ""
+          ],
+          [
+            "Unit testing",
+            ""
+          ],
+          [
+            "Mocha",
+            ""
+          ],
+          [
+            "Chai",
+            ""
+          ],
+          [
+            "xUnit",
+            ""
+          ],
+          [
+            "Code reviews",
+            ""
+          ],
+          [
+            "CI/CD",
+            ""
+          ],
+          [
+            "GitHub Actions",
+            ""
+          ],
+          [
+            "Incident analysis",
+            ""
+          ],
+          [
+            "On-call support",
+            ""
+          ]
+        ]
+      },
+      {
+        "id": "g6",
+        "name": "Tools & Cloud",
+        "items": [
+          [
+            "AWS",
+            ""
+          ],
+          [
+            "EC2",
+            ""
+          ],
+          [
+            "S3",
+            ""
+          ],
+          [
+            "ELB",
+            ""
+          ],
+          [
+            "Docker",
+            ""
+          ],
+          [
+            "Nginx",
+            ""
+          ],
+          [
+            "Linux",
+            ""
+          ],
+          [
+            "Git",
+            ""
+          ],
+          [
+            "GitLab",
+            ""
+          ],
+          [
+            "Swagger / OpenAPI",
+            ""
+          ],
+          [
+            "BullMQ",
+            ""
+          ],
+          [
+            "React",
+            ""
+          ],
+          [
+            "WebGL",
+            ""
+          ]
+        ]
+      }
+    ]
+  },
+  "music": {
+    "eyebrow": "off the clock",
+    "title": "The other",
+    "titleEm": "instrument.",
+    "body": "I'm a composer, producer and singer. Piano came first, twelve years ago, and the rest followed. I've performed on stage with Abanico Dance Studio, and I may play a show at the opening of its new café.",
+    "tags": [
+      "piano · 12 yrs",
+      "production · 4 yrs",
+      "composition · 3 yrs",
+      "guitar · 2 yrs",
+      "singing · 2 yrs",
+      "flute",
+      "xylophone"
+    ],
+    "cta": "open the studio",
+    "phraseLabel": "play my name ♪",
+    "phraseHint": "The phrase spells my name in notes: A, E, G and H, which is B in German notation."
+  },
+  "contact": {
+    "eyebrow": "contact",
+    "title": "Start a session.",
+    "body": "I'm looking for junior and full-stack developer roles in the Greater Toronto Area, hybrid or on-site. The fastest way to reach me is email.",
+    "links": [
+      {
+        "id": "l1",
+        "label": "linkedin",
+        "url": "https://www.linkedin.com/in/alinategh"
+      },
+      {
+        "id": "l2",
+        "label": "github",
+        "url": "https://github.com/Ali-Nategh"
+      }
+    ],
+    "pings": [
+      "happy to chat",
+      "replies within a day",
+      "available to start soon"
+    ]
+  },
+  "sphere": {
+    "tags": [
+      "TypeScript",
+      "Node.js",
+      "C#",
+      ".NET",
+      "SQL Server",
+      "PostgreSQL",
+      "MongoDB",
+      "Redis",
+      "GraphQL",
+      "Docker",
+      "AWS",
+      "♪"
+    ]
+  },
+  "footer": {
+    "line": "You've reached the end of the page. The terminal has more.",
+    "copy": "© 2026 Ali Nategh · hand-built, self-hosted"
+  },
+  "nav": {
+    "cta": "get in touch",
+    "projects": "projects",
+    "experience": "experience",
+    "education": "education",
+    "certs": "certifications",
+    "stack": "skills",
+    "music": "music",
+    "studio": "studio ♪",
+    "terminal": "terminal",
+    "topStudio": "♪ studio",
+    "topTty": "~/tty",
+    "footTty": "open ~/tty"
+  },
+  "studio": {
+    "back": "back to the site",
+    "backSub": "ali nategh · studio",
+    "eyebrow": "studio",
+    "title1": "The",
+    "titleEm": "music",
+    "title2": "room.",
+    "intro": "Write a melody on the staff, choose an instrument, and press play. Click the staff or the keyboard to add notes, drag a note up or down to change its pitch, and sign it with your name before you save.",
+    "sheetsTitle": "My sheets",
+    "instruments": [
+      {
+        "id": "piano",
+        "name": "Piano",
+        "note": "Struck and decaying. Triangle wave with a closing filter."
+      },
+      {
+        "id": "guitar",
+        "name": "Guitar",
+        "note": "Plucked string, modelled with Karplus–Strong."
+      },
+      {
+        "id": "flute",
+        "name": "Flute",
+        "note": "Breath noise, a pure tone, slow vibrato."
+      },
+      {
+        "id": "xylophone",
+        "name": "Xylophone",
+        "note": "Bright mallet hit with a short ring."
+      },
+      {
+        "id": "voice",
+        "name": "Voice",
+        "note": "Sawtooth through vowel formants, sung \"ah\"."
+      }
+    ],
+    "example": null,
+    "linksLabel": "Hear more of my music",
+    "links": [
+      {
+        "id": "m1",
+        "label": "▶ YouTube · @AllinBeats",
+        "url": "https://www.youtube.com/@AllinBeats"
+      },
+      {
+        "id": "m2",
+        "label": "Instagram · @allin.beats",
+        "url": "https://www.instagram.com/allin.beats"
+      }
+    ],
+    "libTitle": "Sheet library",
+    "libIntro": "Open any of these to play it or use it as a starting point. Opening one gives you your own copy to edit.",
+    "library": [
+      {
+        "id": "lb1",
+        "title": "Signature (A–E–G–H)",
+        "composer": "Ali Nategh",
+        "note": "The notes hidden in my name",
+        "tempo": 84,
+        "time": "4/4",
+        "voice": "piano",
+        "notes": [
+          {
+            "k": [
+              {
+                "s": 5,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 4,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 5,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 4,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 5,
+                "a": 0
+              },
+              {
+                "s": 6,
+                "a": 0
+              },
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "h",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": -2,
+                "a": 0
+              },
+              {
+                "s": 2,
+                "a": 0
+              },
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "w",
+            "dot": false
+          }
+        ]
+      },
+      {
+        "id": "lb2",
+        "title": "Deploy Succeeded",
+        "composer": "",
+        "note": "Green checks all the way down",
+        "tempo": 132,
+        "time": "4/4",
+        "voice": "piano",
+        "notes": [
+          {
+            "k": [
+              {
+                "s": 4,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 11,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 11,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              },
+              {
+                "s": 9,
+                "a": 0
+              },
+              {
+                "s": 11,
+                "a": 0
+              }
+            ],
+            "d": "w",
+            "dot": false
+          }
+        ]
+      },
+      {
+        "id": "lb3",
+        "title": "Build Failed",
+        "composer": "",
+        "note": "Wah, wah, wah, waaah",
+        "tempo": 66,
+        "time": "4/4",
+        "voice": "voice",
+        "notes": [
+          {
+            "k": [
+              {
+                "s": 4,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 3,
+                "a": 1
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 3,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "h",
+            "dot": false
+          }
+        ]
+      },
+      {
+        "id": "lb4",
+        "title": "404",
+        "composer": "",
+        "note": "Not found: a tritone that never resolves",
+        "tempo": 80,
+        "time": "4/4",
+        "voice": "xylophone",
+        "notes": [
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "h",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 10,
+                "a": 1
+              }
+            ],
+            "d": "h",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              },
+              {
+                "s": 10,
+                "a": 1
+              }
+            ],
+            "d": "w",
+            "dot": false
+          }
+        ]
+      },
+      {
+        "id": "lb5",
+        "title": "Merge Conflict",
+        "composer": "",
+        "note": "Two branches, one tune, half a step apart",
+        "tempo": 96,
+        "time": "4/4",
+        "voice": "piano",
+        "notes": [
+          {
+            "k": [
+              {
+                "s": 0,
+                "a": 0
+              },
+              {
+                "s": 1,
+                "a": -1
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              },
+              {
+                "s": 3,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 4,
+                "a": 0
+              },
+              {
+                "s": 5,
+                "a": -1
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              },
+              {
+                "s": 3,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              },
+              {
+                "s": 8,
+                "a": -1
+              }
+            ],
+            "d": "h",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 4,
+                "a": 0
+              },
+              {
+                "s": 5,
+                "a": -1
+              }
+            ],
+            "d": "h",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 0,
+                "a": 0
+              },
+              {
+                "s": 1,
+                "a": -1
+              }
+            ],
+            "d": "w",
+            "dot": false
+          }
+        ]
+      },
+      {
+        "id": "lb6",
+        "title": "Power On",
+        "composer": "",
+        "note": "The boot chime from sudo reboot",
+        "tempo": 100,
+        "time": "4/4",
+        "voice": "piano",
+        "notes": [
+          {
+            "k": [
+              {
+                "s": 0,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 4,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              },
+              {
+                "s": 9,
+                "a": 0
+              },
+              {
+                "s": 11,
+                "a": 0
+              }
+            ],
+            "d": "h",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              },
+              {
+                "s": 9,
+                "a": 0
+              },
+              {
+                "s": 11,
+                "a": 0
+              }
+            ],
+            "d": "w",
+            "dot": false
+          }
+        ]
+      },
+      {
+        "id": "lb7",
+        "title": "Power Off",
+        "composer": "",
+        "note": "And the way back down",
+        "tempo": 100,
+        "time": "4/4",
+        "voice": "piano",
+        "notes": [
+          {
+            "k": [
+              {
+                "s": 11,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 4,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 0,
+                "a": 0
+              },
+              {
+                "s": 4,
+                "a": 0
+              }
+            ],
+            "d": "h",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 0,
+                "a": 0
+              },
+              {
+                "s": 4,
+                "a": 0
+              }
+            ],
+            "d": "w",
+            "dot": false
+          }
+        ]
+      },
+      {
+        "id": "lb8",
+        "title": "Für Elise (opening)",
+        "composer": "Ludwig van Beethoven",
+        "note": "Public domain, 1810",
+        "tempo": 70,
+        "time": "3/8",
+        "voice": "piano",
+        "notes": [
+          {
+            "r": true,
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 1
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 1
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 5,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 0,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 5,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 4,
+                "a": 1
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 1
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 1
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 5,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 0,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 5,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 5,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": true
+          }
+        ]
+      },
+      {
+        "id": "lb9",
+        "title": "Gymnopédie No. 1 (opening)",
+        "composer": "Erik Satie",
+        "note": "Public domain, 1888",
+        "tempo": 72,
+        "time": "3/4",
+        "voice": "piano",
+        "notes": [
+          {
+            "r": true,
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": -1,
+                "a": 0
+              },
+              {
+                "s": 1,
+                "a": 0
+              },
+              {
+                "s": 3,
+                "a": 1
+              }
+            ],
+            "d": "h",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": -2,
+                "a": 0
+              },
+              {
+                "s": 0,
+                "a": 1
+              },
+              {
+                "s": 3,
+                "a": 1
+              }
+            ],
+            "d": "h",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": -1,
+                "a": 0
+              },
+              {
+                "s": 1,
+                "a": 0
+              },
+              {
+                "s": 3,
+                "a": 1
+              }
+            ],
+            "d": "h",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": -2,
+                "a": 0
+              },
+              {
+                "s": 0,
+                "a": 1
+              },
+              {
+                "s": 3,
+                "a": 1
+              }
+            ],
+            "d": "h",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 10,
+                "a": 1
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 12,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 11,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 10,
+                "a": 1
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 1
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 1
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 5,
+                "a": 0
+              }
+            ],
+            "d": "h",
+            "dot": true
+          },
+          {
+            "k": [
+              {
+                "s": 3,
+                "a": 1
+              }
+            ],
+            "d": "h",
+            "dot": true
+          }
+        ]
+      },
+      {
+        "id": "lb10",
+        "title": "In the Hall of the Mountain King (opening)",
+        "composer": "Edvard Grieg",
+        "note": "Public domain, 1875",
+        "tempo": 120,
+        "time": "4/4",
+        "voice": "piano",
+        "notes": [
+          {
+            "k": [
+              {
+                "s": -1,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 0,
+                "a": 1
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 1,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 3,
+                "a": 1
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 1,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 3,
+                "a": 1
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 3,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 0,
+                "a": 1
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 3,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 0,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": -1,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 0,
+                "a": 1
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 1,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 3,
+                "a": 1
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 1,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 3,
+                "a": 1
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 5,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 3,
+                "a": 1
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 1,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 3,
+                "a": 1
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 5,
+                "a": 0
+              }
+            ],
+            "d": "h",
+            "dot": false
+          }
+        ]
+      },
+      {
+        "id": "lb11",
+        "title": "The Entertainer (opening)",
+        "composer": "Scott Joplin",
+        "note": "Public domain, 1902 · simplified",
+        "tempo": 80,
+        "time": "2/4",
+        "voice": "piano",
+        "notes": [
+          {
+            "r": true,
+            "d": "q",
+            "dot": true
+          },
+          {
+            "k": [
+              {
+                "s": 1,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 1,
+                "a": 1
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 2,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 1
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 9,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 8,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "s",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "q",
+            "dot": false
+          }
+        ]
+      },
+      {
+        "id": "lb12",
+        "title": "Shave and a Haircut",
+        "composer": "Traditional",
+        "note": "Knock knock. The last two notes are the answer.",
+        "tempo": 120,
+        "time": "4/4",
+        "voice": "piano",
+        "notes": [
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 4,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 4,
+                "a": 0
+              }
+            ],
+            "d": "e",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 5,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 4,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 6,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "k": [
+              {
+                "s": 7,
+                "a": 0
+              }
+            ],
+            "d": "q",
+            "dot": false
+          },
+          {
+            "r": true,
+            "d": "q",
+            "dot": false
+          }
+        ]
+      }
+    ]
+  },
+  "tty": {
+    "welcome": "Welcome to {first}'s terminal. Type *help* to see what you can do here.",
+    "commands": [
+      {
+        "id": "t1",
+        "name": "coffee",
+        "desc": "refuel",
+        "out": "Brewing… ☕\n*Done.* Back to work.",
+        "action": "nothing",
+        "arg": ""
+      },
+      {
+        "id": "t2",
+        "name": "fun-fact",
+        "desc": "something about me",
+        "out": "I've played piano for twelve years, longer than I've been writing code.",
+        "action": "nothing",
+        "arg": ""
+      },
+      {
+        "id": "t3",
+        "name": "signature",
+        "desc": "play the notes hidden in my name",
+        "out": "A · E · G · H  (H is B in German notation)",
+        "action": "play sheet",
+        "arg": "signature"
+      }
+    ]
+  },
+  "updatedAt": 1793735534640
+}
