@@ -23,7 +23,7 @@
   },
   "hero": {
     "cmd": "whoami",
-    "bio": "Software engineer in Toronto building *full-stack apps and HTTP APIs* with *TypeScript, Node.js and C#/.NET* on SQL Server. At BarAI I built and ran Mergify, a Shopify app rated 4.6/5. Off the clock, I write music at a *piano*."
+    "bio": "Software engineer in Toronto building *full-stack apps and HTTP APIs* with *TypeScript, Node.js and C#/.NET* on SQL Server. At BarAI I built and ran Mergify, a Shopify app rated 4.6/5. Off the clock, I write music at with *FL Studio* and a *piano*."
   },
   "order": [
     {
@@ -2691,5 +2691,5 @@
       }
     ]
   },
-  "updatedAt": 1793735534640
+  "updatedAt": 1793740313149
 }
