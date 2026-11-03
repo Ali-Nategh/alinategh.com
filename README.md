@@ -70,7 +70,9 @@ Everything the home page and studio show lives in one object, `C`. The default c
 - Every editable piece of text has a `data-edit="path.to.field"` attribute. In edit mode those elements become `contentEditable`, and on `input` the new text is written back to that path in `C`.
 - Lists (experience bullets, projects, courses, links) get small ↑ ↓ ✕ tool buttons and a "+ add" card. The side panel (**Site · Sections · Item · Terminal**) covers what can't be clicked: section order and visibility, theme, tab icon, mini-Ali settings, terminal commands and so on.
 - Undo is a stack of JSON snapshots, capped at 60.
-- **Save** keeps a draft in `localStorage`, and **Export** downloads `content.json`. Put that file next to `index.html` and every visitor sees the new version. The newer of the two, the draft or the server's file, wins.
+- **Save** keeps a draft in `localStorage`, and **Export** downloads `content.json`. Put that file next to `index.html` and every visitor sees the new version.
+- The server's `content.json` always wins. A browser draft is only shown while it is still based on the `content.json` the server is serving; upload a different file and the draft is set aside (with a one-click *restore*). Once the exported file is live, the matching draft is cleared automatically.
+- The editor waits for `content.json` before opening, so it never starts from the built-in defaults. If the file can't load (a 404, or the page opened as `file://`), the console and the editor say so.
 
 The editor only ever changes the editing person's own browser, so it can be left open on the live site without risk. To lock it to `localhost` or turn it off, change one line at the top of the editor code:
 
@@ -218,7 +220,7 @@ Then open <http://localhost:8000>, and <http://localhost:8000/#admin> to edit.
 docker compose up -d             # serves on :8080; put Caddy or Certbot in front for HTTPS
 ```
 
-The nginx config compresses text, caches CSS and JS for a week, makes sure `index.html` and `content.json` are always fresh, adds security headers, and refuses to serve `tools/`, `deploy/`, `docs/` and the README.
+The nginx config compresses text, makes browsers revalidate `index.html`, `content.json`, CSS and JS on every visit (so a deploy shows up immediately), caches images for a month, adds security headers, and refuses to serve `tools/`, `deploy/`, `docs/` and the README.
 
 **GitHub Pages / Netlify / Cloudflare Pages:** point them at the repo root. No build command is needed.
 

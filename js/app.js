@@ -1303,7 +1303,7 @@ $('#importFile').addEventListener('change', e => {
 async function saveSite() {
   const btn = $('#admSave'); btn.disabled = true;
   try {
-    C.updatedAt = Date.now(); if (!LS.set('an.site.draft', C)) throw new Error('storage');
+    if (!saveDraft()) throw new Error('storage');
     toast('Saved in this browser. Export content.json to publish it.');
     saved = clone(C); setDirty(false); btn.disabled = false; return true;
   } catch (err) {
@@ -1313,8 +1313,9 @@ async function saveSite() {
   }
 }
 async function exportContent() {
-  if (!C.updatedAt || dirty) C.updatedAt = Date.now();
+  C.updatedAt = Date.now();
   const data = JSON.stringify(C, null, 2);
+  LS.set(DRAFT_KEY, { base: C.updatedAt, content: C });   // once this file is on the server, the draft matches it and is dropped
   try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' })); a.download = 'content.json'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
   catch { toast('Export is not available here.'); }
 }
@@ -1497,24 +1498,60 @@ function route() {
   } else {
     if (play) stopPlay();
     kick();
-    if (h === 'admin' && !editing) enterEdit();
+    if (h === 'admin' && !editing) contentReady.then(() => { if (!editing && location.hash === '#admin') enterEdit(); });
   }
   const pg = $('#admPage'); if (pg) pg.innerHTML = studio ? '← home page' : 'studio page →';
 }
 addEventListener('hashchange', route);
 addEventListener('resize', () => { if (!$('#studio').hidden) { clearTimeout(route.r); route.r = setTimeout(renderSheet, 120); } });
 
-// first paint from defaults (or a draft saved in this browser), then upgrade from the store
-const draft = LS.get('an.site.draft', null);
-if (draft && draft.site) { C = merge(DEFAULT, draft); saved = clone(C); afterContentLoad(); }
+/* ---------- content loading ----------
+   content.json next to index.html is the published content; every visitor sees it.
+   A draft saved in this browser (by the editor) is shown instead only while it is still
+   based on that same content.json. Upload a new content.json and the server wins. */
+const DRAFT_KEY = 'an.site.draft';
+let published = clone(C);                       // what the server is serving (defaults until it loads)
+const stamp = o => (o && o.updatedAt) || 0;
+const bare = o => { const c = clone(o); delete c.updatedAt; return JSON.stringify(c); };
+function saveDraft() { return LS.set(DRAFT_KEY, { base: stamp(published), content: C }); }
+function readDraft() {
+  const d = LS.get(DRAFT_KEY, null);
+  if (d && d.content && d.content.site) return d;
+  if (d && d.site) return { base: -1, content: d };   // older draft format: treat as out of date
+  return null;
+}
+function useContent(o) { C = merge(DEFAULT, o); saved = clone(C); if (!editing || !dirty) { render(); if (editing) renderPanel(); } afterContentLoad(); }
+function applyLoaded(serverObj) {
+  if (serverObj) published = merge(DEFAULT, serverObj);
+  const d = readDraft();
+  if (d && bare(merge(DEFAULT, d.content)) === bare(published)) { LS.del(DRAFT_KEY); d.drop = true; }   // draft already published
+  if (d && !d.drop && d.base === stamp(published)) {
+    useContent(d.content);
+    toast('Showing edits saved in this browser. They are not published yet.', 'discard them', () => { LS.del(DRAFT_KEY); useContent(published); toast('Showing the published content.json'); });
+    return;
+  }
+  if (d && !d.drop) {   // content.json changed on the server after this draft was made: the server wins
+    LS.del(DRAFT_KEY); LS.set(DRAFT_KEY + '.old', d);
+    useContent(published);
+    toast('content.json on the server changed since your browser draft, so the server version is showing. The draft was set aside.', 'restore it', () => { useContent(d.content); saveDraft(); toast('Draft restored. Export content.json to publish it.'); });
+    return;
+  }
+  if (serverObj) useContent(published);
+}
 render();
 renderToolbar();
 if (!reduce) { const tEl = document.querySelector('#heroMain [data-edit="hero.cmd"]'); if (tEl) { const w = tEl.textContent; tEl.textContent = ''; let i = 0; const step = () => { if (editing) { tEl.textContent = w; return; } tEl.textContent = w.slice(0, ++i); if (i < w.length) setTimeout(step, 90 + Math.random() * 80); }; setTimeout(step, 400); } }
+const contentReady = (location.protocol === 'file:'
+  ? Promise.reject(new Error('file'))
+  : fetch('content.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(o => { if (!o || !o.site) throw new Error('not a content.json'); return o; })
+).then(o => applyLoaded(o), err => {
+  const why = location.protocol === 'file:'
+    ? 'This page was opened as a file, so content.json cannot load. Serve the folder instead (python3 -m http.server).'
+    : `content.json did not load (${err.message}), so the built-in content is showing.`;
+  console.warn('[content] ' + why);
+  if (location.hash === '#admin') setTimeout(() => toast(why), 600);
+  applyLoaded(null);
+});
 route();
 
-// content.json (next to index.html) is the published content; a newer draft saved in this browser wins
-if (location.hash === '#admin') enterEdit();
-fetch('content.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(o => {
-  if (o && o.site && (!draft || (o.updatedAt || 0) >= (draft.updatedAt || 0))) { if (draft) LS.del('an.site.draft'); C = merge(DEFAULT, o); saved = clone(C); if (!editing) render(); afterContentLoad(); }
-}).catch(() => {});
 })();
