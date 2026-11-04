@@ -670,7 +670,7 @@
             linksLabel: "Hear more of my music",
             links: [
                 {
-                    id: "m1",
+                    id: "m0",
                     label: "▶ Spotify · Ali Nategh",
                     url: "https://open.spotify.com/artist/1CHSJfFKd4UCEoLyvLUkPx?si=vjbDSP1OQ8WdtowOOZJjeg&utm_source=copy-link",
                 },
@@ -1029,7 +1029,7 @@
       <div class="piano-box">
         <div class="piano-head"><span>~/piano · C4–G5</span><span class="note-read" id="noteRead" aria-live="polite">—</span></div>
         <div class="piano" id="homePiano" aria-label="Playable piano keyboard"></div>
-        <div class="piano-actions"><button class="btn claret" type="button" id="riff">${T("music.phraseLabel")}</button></div>
+        <div class="piano-actions"><button class="btn claret" type="button" id="riff">${T("music.phraseLabel")}</button><span class="name-notes" id="nameNotes" aria-hidden="true">${nameNotesHTML()}</span></div>
         ${T("music.phraseHint", "p", "hint")}
         <p class="hint">Click, tap or drag across the keys. On a keyboard, use <kbd>A</kbd>–<kbd>'</kbd> for white keys and <kbd>W</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>Y</kbd> <kbd>U</kbd> <kbd>O</kbd> <kbd>P</kbd> for black keys.</p>
       </div>
@@ -1398,7 +1398,8 @@
     const pulse = (amt = 0.55) => {
         energy = Math.min(1.3, energy + amt);
         vY += 0.01;
-    };
+        dispatchEvent(new Event("music:note"));
+    }; // bitnotes.js listens
 
     /* =====================================================================
    AUDIO — five synth voices shared by the home piano and the studio
@@ -1772,6 +1773,21 @@
         );
         return Math.max(...seq.map((x) => x[1] + x[2] * 0.6)) * beatMs;
     }
+    /* letters A–H are notes (H is B in German); the rest of the name is shown dimmed */
+    function nameNotesHTML() {
+        return [...String(C.site.last || "")]
+            .map(
+                (ch) =>
+                    `<span class="nn ${/[a-h]/i.test(ch) ? "on" : "off"}">${E(ch.toUpperCase())}</span>`,
+            )
+            .join("");
+    }
+    function lightName(i) {
+        const on = $$("#nameNotes .nn.on");
+        on.forEach((el, k) =>
+            el.classList.toggle("lit", i === "all" || k === i),
+        );
+    }
     let riffing = false;
     function riff() {
         if (riffing) return;
@@ -1781,11 +1797,17 @@
         SIGNATURE.slice(0, 4).forEach((x, i) =>
             setTimeout(() => {
                 if (nr) nr.textContent = names[i];
+                lightName(i);
             }, x[1] * 420),
+        );
+        SIGNATURE.slice(4, 8).forEach((x, i) =>
+            setTimeout(() => lightName(i), x[1] * 420),
         );
         setTimeout(() => {
             if (nr) nr.textContent = "A·E·G·H";
+            lightName("all");
         }, 4.5 * 420);
+        setTimeout(() => lightName(-1), 7.6 * 420);
         playSeq(SIGNATURE);
         setTimeout(() => (riffing = false), 5 * 420);
     }
@@ -1852,19 +1874,18 @@
         sh.composer = sh.composer || "";
         return sh;
     }
-    const BUILTIN_EXAMPLE = () =>
-        normSheet({
-            id: null,
-            example: true,
-            title: "Late Rehearsal",
-            composer: "Ali Nategh",
-            tempo: 92,
-            time: "4/4",
-            voice: "piano",
-            notes: P(
-                "q:A4 q:C5 h:E5 | e:D5 e:C5 q:B4 q:C5 q:A4 | q.:G4 e:B4 h:D5 | h.:C5 q:r | q:E5 e:D5 e:C5 q:B4 q:G#4 | w:A4",
-            ),
-        });
+    const BUILTIN_EXAMPLE = () => {
+        // the sheet a first-time visitor sees: Für Elise from the library
+        const lib = (C.studio && C.studio.library) || [],
+            pick =
+                lib.find((x) => /^f[üu]r elise/i.test(x.title || "")) || lib[0];
+        return normSheet(
+            Object.assign(clone(pick || {title: "", notes: []}), {
+                id: null,
+                example: true,
+            }),
+        );
+    };
     const EXAMPLE = () =>
         C.studio && C.studio.example && Array.isArray(C.studio.example.notes)
             ? normSheet(
@@ -1894,7 +1915,11 @@
             notes: [],
         });
 
-    let sheet = normSheet(LS.get("an.studio.current", null) || EXAMPLE());
+    let sheet = normSheet(
+        ((c) => (c && !c.example ? c : null))(
+            LS.get("an.studio.current", null),
+        ) || EXAMPLE(),
+    ); // an untouched example is always the current one
     let sel = -1; // selected event index
     let selK = 0; // active note inside the selected chord
     let tool = {mode: "note", d: "q", dot: false, a: 0, chord: false};
@@ -2795,9 +2820,16 @@
             if (!n.r) playEvent(n, Math.max(0.12, dur * 0.94), t0 + t, bus);
             t += dur;
         }
-        play = {bus, times, end: t0 + t, cur: -1};
+        play = {
+            bus,
+            times,
+            end: t0 + t,
+            cur: -1,
+            title: sheet.title || "Untitled",
+        };
         renderToolbar();
         renderSheet();
+        updateNowPlaying();
         const tick = () => {
             if (!play) return;
             const now = ac.currentTime,
@@ -2821,19 +2853,7 @@
                             if (p.a !== -1)
                                 kb._light("s" + p.s + (p.a === 1 ? "#" : ""));
                         });
-                    }
-                    const L = layout[ci];
-                    if (L && !reduce) {
-                        const r = svgEl.getBoundingClientRect(),
-                            ty =
-                                r.top +
-                                (L.sys * SYS_H * r.height) /
-                                    svgEl.viewBox.baseVal.height;
-                        if (ty < 60 || ty > innerHeight - 160)
-                            scrollBy({
-                                top: ty - innerHeight / 3,
-                                behavior: "smooth",
-                            });
+                        pulse(0.25 + 0.08 * n.k.length);
                     }
                 }
             }
@@ -2867,6 +2887,26 @@
         $("#sSaved").textContent = "";
         renderSheet();
         renderToolbar();
+        updateNowPlaying();
+    }
+    /* a small "now playing" pill, so a sheet can keep playing while you look around the home page */
+    const nowPlaying = document.createElement("div");
+    nowPlaying.id = "nowPlaying";
+    nowPlaying.className = "now-playing";
+    nowPlaying.hidden = true;
+    nowPlaying.innerHTML =
+        '<button type="button" data-np="open" title="Back to the studio"><span class="np-eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="np-t"></span></button><button type="button" data-np="stop" aria-label="Stop playback">■</button>';
+    document.body.appendChild(nowPlaying);
+    nowPlaying.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-np]");
+        if (!b) return;
+        if (b.dataset.np === "stop") stopPlay();
+        else location.hash = "studio";
+    });
+    function updateNowPlaying() {
+        const show = !!play && $("#studio").hidden;
+        nowPlaying.hidden = !show;
+        if (show) nowPlaying.querySelector(".np-t").textContent = play.title;
     }
 
     /* ---------- storage: current draft, saved sheets ---------- */
@@ -4466,7 +4506,6 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
             scrollTo(0, 0);
             if (editing) makeEditable();
         } else {
-            if (play) stopPlay();
             kick();
             if (h === "admin" && !editing)
                 contentReady.then(() => {
@@ -4475,6 +4514,7 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
         }
         const pg = $("#admPage");
         if (pg) pg.innerHTML = studio ? "← home page" : "studio page →";
+        updateNowPlaying();
     }
     addEventListener("hashchange", route);
     addEventListener("resize", () => {

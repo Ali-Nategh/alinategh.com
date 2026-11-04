@@ -54,17 +54,25 @@
 
   const notes = [];
   const rand = (a, b) => a + Math.random() * (b - a);
-  function spawn(now) {
-    const max = small ? 3 : 5; if (notes.length >= max) return;
+  /* while music plays (home piano, play my name, the studio, the terminal) the page fills up with smaller notes */
+  let hotUntil = 0, lastBurst = 0;
+  addEventListener('music:note', () => {
+    const now = performance.now(); hotUntil = now + 2600;
+    if (now - lastBurst > 380 && !document.hidden) { lastBurst = now; spawn(now, true); }
+  });
+  function spawn(now, mini) {
+    const hot = now < hotUntil;
+    const max = hot ? (small ? 6 : 10) : (small ? 3 : 5); if (notes.length >= max) return;
     const ch = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
-    const px = (small ? rand(70, 100) : rand(110, 170)) * (ch === '𝄞' ? .62 : 1);   // the clef is tall, so draw it at a smaller font size
-    const shape = cellsFor(ch, Math.round(px)), base = shape.cells; if (base.length < 12) return;   // font missing that symbol
+    const size = mini ? (small ? rand(40, 58) : rand(52, 84)) : (small ? rand(70, 100) : rand(110, 170));
+    const px = size * (ch === '𝄞' ? .62 : 1);   // the clef is tall, so draw it at a smaller font size
+    const shape = cellsFor(ch, Math.round(px)), base = shape.cells; if (base.length < (mini ? 6 : 12)) return;   // font missing that symbol
     let x, y, tries = 0;
     const padX = shape.w / 2 + 8, padY = shape.h / 2 + 8, reach = Math.max(shape.w, shape.h);
     if (W < padX * 2 || H < padY * 2) return;
     do { x = rand(padX, W - padX); y = rand(padY, H - padY); tries++; }
-    while (tries < 14 && notes.some(n => Math.hypot(n.x - x, n.y - y) < (reach + n.reach) * .7));
-    const build = rand(1400, 2200), hold = rand(1800, 3200), fade = rand(1200, 1900);
+    while (tries < 14 && notes.some(n => Math.hypot(n.x - x, n.y - y) < (reach + n.reach) * (mini ? .55 : .7)));
+    const build = mini ? rand(500, 900) : rand(1400, 2200), hold = mini ? rand(700, 1300) : rand(1800, 3200), fade = mini ? rand(600, 1000) : rand(1200, 1900);
     const t0 = now;
     notes.push({
       x, y, t0, reach, end: t0 + build + hold + fade,
@@ -84,7 +92,7 @@
     if (document.hidden) { requestAnimationFrame(frame); return; }
     if (now - last < 33) { requestAnimationFrame(frame); return; }  // ~30 fps is plenty for a background
     last = now;
-    if (now >= nextSpawn) { spawn(now); nextSpawn = now + rand(900, 2600); }
+    if (now >= nextSpawn) { spawn(now); nextSpawn = now + (now < hotUntil ? rand(500, 1100) : rand(900, 2600)); }
     g.clearRect(0, 0, W, H);
     g.font = `500 ${CELL + 1}px "IBM Plex Mono", ui-monospace, monospace`;
     g.textAlign = 'center'; g.textBaseline = 'middle';

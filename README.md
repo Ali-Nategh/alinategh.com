@@ -25,7 +25,7 @@ Plain HTML, CSS and JavaScript. No framework, no build step, no dependencies.
 | **Experience, skills, projects, education, certifications** | All driven by one content file, so I can reorder, hide or rewrite any section without touching code. |
 | **The studio** (`#studio`) | A small sheet-music editor: write notes and chords on a staff, choose one of five synth voices, play it back and save it. |
 | **The terminal** (`` ` `` key) | A fake zsh with real commands (`whoami`, `projects`, `goto music`, `theme light`, `sudo reboot`…) plus my own custom commands. |
-| **Themes** | Navy & brass (default), Burgundy, Terminal and Light. Visitors pick one from the top bar and their browser remembers it. |
+| **Themes** | Navy & brass (default), Burgundy, Terminal, Light and Liquid glass. Visitors pick one from the top bar and their browser remembers it. |
 | **Mini Ali** | A pixel-art me who lives at the edge of the page and gets up to things. Click him and he waves. |
 | **Binary notes** | Faint musical notes in the background that assemble out of `0`s and `1`s, hold for a moment, then dissolve. |
 | **In-page editor** (`#admin`) | Click any text on the page to edit it, then use the side panel for everything else. Export the result as `content.json`. |
@@ -49,7 +49,7 @@ Plain HTML, CSS and JavaScript. No framework, no build step, no dependencies.
 
 | Layer | What | Why |
 |---|---|---|
-| Markup / style | Semantic HTML, modern CSS (custom properties, grid, `clamp()`, `backdrop-filter`) | Four themes are just four sets of CSS variables |
+| Markup / style | Semantic HTML, modern CSS (custom properties, grid, `clamp()`, `backdrop-filter`) | Each theme is mostly just a set of CSS variables |
 | Behaviour | Vanilla JavaScript (ES2020+), no libraries | Everything here is small enough not to need a framework, and the page loads instantly |
 | Graphics | Canvas 2D (sphere, binary notes, mini Ali), inline SVG (staff notation, icons) | Full control over every pixel, and it stays sharp at any size |
 | Audio | Web Audio API: oscillators, filters, Karplus–Strong, a generated convolution reverb | Five instruments with zero audio files |
@@ -86,6 +86,8 @@ const EDITOR = 'anywhere'; // 'anywhere' | 'localhost' | 'off'
 <summary><b>Themes</b></summary>
 
 Each palette is a block of CSS custom properties under `:root[data-palette="…"]`, covering background, panels, lines, text, accent, claret, the cool accent and the "sunk" surfaces. Switching the theme only changes one attribute on `<html>`. The canvases (sphere, binary notes, mini Ali) re-read their colours whenever `data-palette` changes, using a `MutationObserver`.
+
+**Liquid glass** goes one step further than colours: a colourful wallpaper behind clear panels with a heavy `backdrop-filter: blur() saturate()`, a light gradient sheen, and inset highlights along the edges, so every card, button and menu reads as a piece of glass.
 
 The site owner sets the default theme in the editor. A visitor's choice is stored under `an.theme` and overrides that default for them only. The toggle icon is a small SVG half-circle, so it stays smooth at any zoom.
 
@@ -125,6 +127,7 @@ A sheet is a list of events. Each event is `{ k: [{ s, a }], d, dot }`, where `s
 - **Engraving.** The staff is drawn as SVG: clef, time signature, note heads, stems, flags, ledger lines, accidentals, dots, bar lines and rests. The treble clef is placed by measuring its real glyph with `getBBox()`, so its curl sits on the G line in every font.
 - **Input.** Click the staff, the on-screen keyboard, or your computer keyboard: `A`–`'` for white notes, `W E T Y U O P` for black, `1`–`5` for durations, `.` to dot, `R` for a rest, and `C` or Shift for chords.
 - **Library.** The built-in sheets are written in a compact notation, for example `P("q:C4+E4+G4 e.:A#4 h:r")`. The library has developer jingles (*Deploy Succeeded*, *Build Failed*, *404*, *Merge Conflict*, *Power On / Off*) and public-domain openings (Beethoven, Satie, Grieg, Joplin).
+- **Playback.** Notes are scheduled on the audio clock and the page never scrolls on its own. Leave the studio while a sheet plays and it keeps going: the sphere reacts to every note, and a small *now playing* pill on the home page takes you back or stops it.
 - **Saving.** Visitors' sheets are saved in their own browser. The owner can promote a sheet to the library or to the example sheet from the editor.
 
 </details>
@@ -144,7 +147,7 @@ Press `` ` `` or click **~/tty**. It has command history (↑ ↓) and accepts b
 
 A random note glyph (♪ ♫ ♩ ♬ 𝄞) is drawn once onto an offscreen canvas and sampled on a 6 px grid. Each inked cell becomes one character, `0` or `1`. Every cell gets its own appear time, flip rate and fade-out time, so the note seems to *compile* into place and then decay.
 
-At most 5 notes are on screen at once (3 on phones), positioned so they don't overlap, and the loop runs at about 30 fps. They use the theme's accent colour. The background is skipped entirely when the visitor has `prefers-reduced-motion` turned on.
+At most 5 notes are on screen at once (3 on phones), positioned so they don't overlap, and the loop runs at about 30 fps. While music plays (the home piano, *play my name*, the studio or the terminal) every note fires a `music:note` event: the cap rises to 10 (6 on phones) and smaller, quicker notes join in. They use the theme's accent colour. The background is skipped entirely when the visitor has `prefers-reduced-motion` turned on.
 
 </details>
 
@@ -207,7 +210,7 @@ Any static server works, because the page fetches `content.json` (opening the fi
 ```bash
 git clone https://github.com/Ali-Nategh/alinategh.com.git
 cd alinategh.com
-python3 -m http.server 8000      # or: npx serve .
+python3 -m http.server 8000      # Windows: python -m http.server 8000   ·   or: npx serve .
 ```
 
 Then open <http://localhost:8000>, and <http://localhost:8000/#admin> to edit.
