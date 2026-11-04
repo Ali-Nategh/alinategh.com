@@ -40,6 +40,45 @@
   --sunk:rgba(26,38,82,.05); --sunk-2:rgba(26,38,82,.035); --hover-wash:rgba(26,38,82,.06); --chip-bg:rgba(26,38,82,.04);
   color-scheme:light;
 }
+/* Liquid glass: clear, heavily blurred panels with a bright rim over a colourful wallpaper */
+:root[data-palette="glass"]{
+  --bg-0:#0d1238; --bg-1:#1a1d52; --bg-2:#2b2f78;
+  --panel:rgba(255,255,255,.10); --panel-solid:#262a63; --panel-2:rgba(255,255,255,.14);
+  --line:rgba(255,255,255,.2); --line-strong:rgba(255,255,255,.4);
+  --text:#ffffff; --muted:#dfe3f6; --dim:#aab1d6;
+  --accent:#6cc4ff; --accent-2:#ff7db6; --cool:#8ce8ff; --on-accent:#0b1240;
+  --ok:#5ee6a0; --warn:#ffd166; --bad:#ff7a8a;
+  --sunk:rgba(255,255,255,.07); --sunk-2:rgba(255,255,255,.05); --hover-wash:rgba(255,255,255,.1); --chip-bg:rgba(255,255,255,.08);
+  --rim:inset 0 1px 0 rgba(255,255,255,.55), inset 0 -1px 0 rgba(255,255,255,.12), inset 1px 0 0 rgba(255,255,255,.14), inset -1px 0 0 rgba(255,255,255,.14);
+  --lift:0 24px 60px -24px rgba(6,8,40,.55);
+  color-scheme:dark;
+}
+:root[data-palette="glass"] body{
+  background:
+    radial-gradient(42% 38% at 12% 8%, #ff7ab8 0%, transparent 70%),
+    radial-gradient(40% 40% at 88% 14%, #6f7bff 0%, transparent 70%),
+    radial-gradient(46% 42% at 76% 78%, #1fc8c0 0%, transparent 70%),
+    radial-gradient(38% 36% at 8% 82%, #ffae57 0%, transparent 70%),
+    radial-gradient(60% 50% at 46% 46%, #7a4dff 0%, transparent 72%),
+    linear-gradient(165deg, #1c1656, #10204f 55%, #0b2a52) fixed;
+  background-attachment:fixed;
+}
+:root[data-palette="glass"] .glass,
+:root[data-palette="glass"] .tty-btn,
+:root[data-palette="glass"] .btn:not(.primary),
+:root[data-palette="glass"] .theme-menu,
+:root[data-palette="glass"] .tty-win,
+:root[data-palette="glass"] .adm-panel,
+:root[data-palette="glass"] .adm-bar{
+  background:linear-gradient(150deg, rgba(255,255,255,.2), rgba(255,255,255,.06) 42%, rgba(255,255,255,.1)), rgba(22,26,74,.22);
+  border:1px solid rgba(255,255,255,.24);
+  -webkit-backdrop-filter:blur(26px) saturate(185%); backdrop-filter:blur(26px) saturate(185%);
+  box-shadow:var(--rim), var(--lift);
+}
+:root[data-palette="glass"] .tty-win, :root[data-palette="glass"] .theme-menu, :root[data-palette="glass"] .adm-panel{background-color:rgba(22,26,74,.5)}
+:root[data-palette="glass"] .btn:not(.primary):hover, :root[data-palette="glass"] .tty-btn:hover{background:linear-gradient(150deg, rgba(255,255,255,.3), rgba(255,255,255,.1) 45%, rgba(255,255,255,.16)), rgba(22,26,74,.18); border-color:rgba(255,255,255,.5)}
+:root[data-palette="glass"] .btn.primary{box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 10px 30px -10px rgba(108,196,255,.7)}
+:root[data-palette="glass"] .tty-btn, :root[data-palette="glass"] .btn{border-radius:999px}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}

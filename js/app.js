@@ -3444,6 +3444,10 @@
             label: "Light",
             sw: ["#eceff6", "#ffffff", "#9b6416", "#b2385d"],
         },
+        glass: {
+            label: "Liquid glass",
+            sw: ["#ff7ab8", "#6f7bff", "#1fc8c0", "#ffffff"],
+        },
     };
     function openPanel(tab, item) {
         if (item) panelItem = item;
@@ -3949,7 +3953,10 @@
         ["studio", "open the music room"],
         ["contact", "how to reach me"],
         ["copy-email", "copy my email address"],
-        ["theme", "[navy|burgundy|terminal|light] recolour the site for you"],
+        [
+            "theme",
+            "[navy|burgundy|terminal|light|glass] recolour the site for you",
+        ],
         ["goto", "[section] scroll to a section"],
         ["sudo", "reboot · hire " + C.site.first.toLowerCase()],
         ["clear", "clear the screen"],
@@ -4581,7 +4588,7 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
         (err) => {
             const why =
                 location.protocol === "file:"
-                    ? "This page was opened as a file, so content.json cannot load. Serve the folder instead (python3 -m http.server)."
+                    ? "This page was opened as a file, so content.json cannot load. Serve the folder instead: run  python -m http.server 8000  in it, then open http://localhost:8000"
                     : `content.json did not load (${err.message}), so the built-in content is showing.`;
             console.warn("[content] " + why);
             if (location.hash === "#admin") setTimeout(() => toast(why), 600);
