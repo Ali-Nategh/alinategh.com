@@ -128,7 +128,7 @@
             statusLong: "full-stack · HTTP APIs · GTA",
             location: "Toronto, ON, Canada",
             school: "BCS · York University 2026",
-            email: "AliNategh005@gmail.com",
+            email: "AliNategh.Pro@gmail.com",
         },
         hero: {
             cmd: "whoami",
