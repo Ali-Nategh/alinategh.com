@@ -15,6 +15,7 @@
   let phase = "idle";
   let token = 0;
   let bar = null;
+  const bound = new WeakSet();
 
   const best = () => {
     try { return +localStorage.getItem(BEST_KEY) || 0; } catch { return 0; }
@@ -56,8 +57,8 @@
 
   function bindLaunch() {
     const btn = document.getElementById("echoLaunch");
-    if (!btn || btn.dataset.bound === "1") return;
-    btn.dataset.bound = "1";
+    if (!btn || bound.has(btn)) return;
+    bound.add(btn);
     btn.addEventListener("click", () => {
       if (document.body.classList.contains("editing")) return;
       start();

@@ -227,10 +227,12 @@ python3 -m http.server 8000      # Windows: python -m http.server 8000   ·   or
 
 Then open <http://localhost:8000>, and <http://localhost:8000/#admin> to edit.
 
-After you change `content.json`, refresh the copy baked into `index.html` so the first paint and link previews stay in step with the file. This is not part of the deploy, and it needs Chrome:
+After you change `content.json`, refresh the copy baked into `index.html` so the first paint and link previews stay in step with the file. This is not part of the deploy. It needs Chrome or Chromium. The script looks for `google-chrome`, `chromium`, and the usual macOS app path. If yours lives somewhere else:
 
 ```bash
 node tools/prerender.mjs
+# macOS, when `google-chrome` is not on PATH:
+CHROME_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" node tools/prerender.mjs
 ```
 
 ## Deploy
@@ -241,9 +243,17 @@ node tools/prerender.mjs
 docker compose up -d             # serves on :8080; put Caddy or Certbot in front for HTTPS
 ```
 
-The nginx config compresses text, makes browsers revalidate `index.html`, `content.json`, CSS and JS on every visit (so a deploy shows up immediately), caches images and fonts for a month, adds security headers, refuses to serve `tools/`, `deploy/`, `docs/` and the README, and answers unknown URLs with `404.html`.
+The Docker nginx config compresses text, makes browsers revalidate `index.html`, `content.json`, CSS and JS on every visit (so a deploy shows up immediately), caches images and fonts for a month, adds security headers, refuses to serve `tools/`, `deploy/`, `docs/` and the README, and answers unknown URLs with `404.html`.
 
-If a reverse proxy sits in front of this nginx (Caddy, another nginx, a CDN), it has to let that 404 body through. `proxy_intercept_errors` must stay off, which is the default. A proxy that replaces upstream errors with its own page will never show the lost hall.
+The live VPS does not use that file. `nginx/conf.d/portfolio.conf` is the server people actually hit: it terminates TLS, sets HSTS, rate-limits, and serves the files from `/usr/share/nginx/portfolio` itself. It is not a proxy in front of the container, so nothing in `deploy/nginx.conf` applies there. Its `try_files … =404` also has no `error_page`, which is why an unknown URL shows nginx's own 404 instead of `404.html`.
+
+Keep `portfolio.conf` as the security config. Inside the `listen 443` server only, replace the `location /` block with the site snippet (it brings the lost page and hides `deploy/`, `tools/`, and `docs/`). Leave the SSL lines, `limit_req`, the HSTS and framing headers, the port-80 redirect, and the handshake-reject default server as they are.
+
+```nginx
+include /usr/share/nginx/portfolio/deploy/portfolio.inc.conf;
+```
+
+Then `nginx -t` and reload. Do not include `deploy/nginx.conf`. That is a complete server block for Docker, and swapping it in would drop HSTS and change `X-Frame-Options` from `DENY` to `SAMEORIGIN`. The snippet sets no `add_header` of its own, so the headers on the 443 server keep applying. A location that adds its own header would discard them.
 
 **GitHub Pages / Netlify / Cloudflare Pages:** point them at the repo root. No build command is needed.
 

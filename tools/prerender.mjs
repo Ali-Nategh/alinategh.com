@@ -8,10 +8,11 @@
    regenerated before you ship a content change.
 
    Usage:  node tools/prerender.mjs
+   Chrome is found on PATH (google-chrome, chromium, …) or via CHROME_PATH.
 */
 
-import { spawn } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { spawn, spawnSync } from "node:child_process";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { request as httpRequest } from "node:http";
 import { dirname, extname, join } from "node:path";
@@ -127,10 +128,61 @@ function setRev(html, rev) {
     });
 }
 
+function onPath(cmd) {
+    const finder = process.platform === "win32" ? "where" : "which";
+    const found = spawnSync(finder, [cmd], { encoding: "utf8" });
+    if (found.status !== 0) return null;
+    const line = found.stdout.split(/\r?\n/).map((s) => s.trim()).find(Boolean);
+    return line || null;
+}
+
+/* google-chrome is the Debian package name. macOS, Homebrew, and Chromium builds use other paths. */
+function findChrome() {
+    const fromEnv = process.env.CHROME_PATH || process.env.CHROMIUM_PATH;
+    if (fromEnv) {
+        if (existsSync(fromEnv)) return fromEnv;
+        console.error(`CHROME_PATH is set but that file is not there:\n  ${fromEnv}`);
+        process.exit(1);
+    }
+    const names = ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "chrome"];
+    const files = [
+        "/usr/bin/google-chrome",
+        "/usr/bin/google-chrome-stable",
+        "/usr/bin/chromium",
+        "/usr/bin/chromium-browser",
+        "/snap/bin/chromium",
+        "/opt/homebrew/bin/chromium",
+        "/opt/homebrew/bin/google-chrome",
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "/Applications/Chromium.app/Contents/MacOS/Chromium",
+        "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+        process.env.LOCALAPPDATA && join(process.env.LOCALAPPDATA, "Google/Chrome/Application/chrome.exe"),
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+        "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    ].filter(Boolean);
+    for (const name of names) {
+        const hit = onPath(name);
+        if (hit) return hit;
+    }
+    for (const file of files) if (existsSync(file)) return file;
+    return null;
+}
+
+const chromeBin = findChrome();
+if (!chromeBin) {
+    console.error(`prerender needs Chrome or Chromium, and neither is installed where this script looks.
+Install Google Chrome or Chromium, or point at the binary:
+
+  macOS:  CHROME_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" node tools/prerender.mjs
+  Linux:  CHROME_PATH=/usr/bin/chromium node tools/prerender.mjs
+`);
+    process.exit(1);
+}
+
 const server = await serve();
 const port = server.address().port;
 const chrome = spawn(
-    "google-chrome",
+    chromeBin,
     [
         "--headless=new",
         "--no-sandbox",
@@ -141,19 +193,28 @@ const chrome = spawn(
     ],
     { stdio: "ignore" },
 );
+const chromeFailed = new Promise((_, reject) => {
+    chrome.once("error", (err) => reject(err));
+});
 
 let html;
 try {
     let version;
     for (let i = 0; i < 40; i++) {
         try {
-            version = JSON.parse((await get("http://127.0.0.1:9223/json/version")).body);
+            version = JSON.parse((await Promise.race([
+                get("http://127.0.0.1:9223/json/version"),
+                chromeFailed,
+            ])).body);
             break;
-        } catch {
+        } catch (err) {
+            if (err && err.code === "ENOENT") {
+                throw new Error(`Could not start ${chromeBin}. Set CHROME_PATH to the Chrome or Chromium binary.`);
+            }
             await new Promise((r) => setTimeout(r, 150));
         }
     }
-    if (!version) throw new Error("Chrome devtools did not start");
+    if (!version) throw new Error(`Chrome devtools did not start (tried ${chromeBin}).`);
     const opened = await put(`http://127.0.0.1:9223/json/new?${encodeURIComponent(`http://127.0.0.1:${port}/?prerender=1`)}`);
     if (opened.status >= 400) throw new Error("devtools refused a new tab: " + opened.body.slice(0, 200));
     const page = JSON.parse(opened.body);
@@ -203,6 +264,6 @@ try {
     writeFileSync(indexPath, html);
     console.log(`prerendered index.html (rev ${data.rev})`);
 } finally {
-    chrome.kill("SIGKILL");
+    try { chrome.kill("SIGKILL"); } catch {}
     server.close();
 }
