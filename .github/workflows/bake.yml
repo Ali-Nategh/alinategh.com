@@ -29,7 +29,15 @@ jobs:
         with:
           node-version: 22
 
+      # ubuntu-latest has no Chrome. The prerender script drives one over DevTools.
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+        with:
+          install-dependencies: true
+
       - name: Prerender index.html from content.json
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
         run: node tools/prerender.mjs
 
       - name: Commit index.html if it changed
@@ -42,4 +50,4 @@ jobs:
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add index.html
           git commit -m "Bake content.json into index.html"
-          git push
+          git push origin HEAD:main
