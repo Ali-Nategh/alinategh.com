@@ -485,13 +485,16 @@
         '<div class="os-radios" role="radiogroup" aria-label="CRT intensity">' +
         ["full", "soft", "off"].map((id) => {
           const label = id === "full" ? "Full" : id === "soft" ? "Soft" : "Off";
-          const on = (document.querySelector(".os") || {}).dataset.crt === id;
+          const cur = window.Crt
+            ? window.Crt.level(document.documentElement.dataset.palette || "")
+            : ((document.querySelector(".os") || {}).dataset.crt || "");
+          const on = cur === id;
           return '<button type="button" role="radio" data-crt="' + id + '" aria-checked="' + on + '">' + label + "</button>";
         }).join("") +
         "</div>" +
         '<p class="os-note">' + (motion
-          ? "Reduced motion is on, so the CRT stays still."
-          : "Full adds a moving grain and a faint flicker. Soft keeps the scanlines still.") + "</p>" +
+          ? "Reduced motion is on, so the CRT stays still. The theme menu uses this same setting."
+          : "Full adds a moving grain and a faint flicker. Soft keeps the scanlines still. The theme menu uses this same setting.") + "</p>" +
         '<p class="os-note">With a window title focused, the arrow keys move it. Shift and the arrow keys resize it. Escape closes it.</p>' +
         "</div>";
       const group = body.querySelector(".os-radios");

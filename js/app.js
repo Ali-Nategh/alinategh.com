@@ -1101,7 +1101,7 @@
       <span><b>${T("site.first")} <span class="sl">/</span> ${T("site.last")}</b>${T("site.tagline", "small")}</span></a>
     <div class="top-right">
       <div class="pill glass status"><i class="dot" aria-hidden="true"></i><span>${T("site.status")}<span class="long"> · ${T("site.statusLong")}</span></span></div>
-      <button class="tty-btn theme-btn" type="button" data-theme-menu aria-haspopup="menu" aria-expanded="false" aria-label="Change colour theme"><svg class="tdot" viewBox="0 0 16 16" aria-hidden="true"><circle class="t-bg" cx="8" cy="8" r="6.6"/><path class="t-fill" d="M8 1.4a6.6 6.6 0 0 1 0 13.2z"/><circle class="t-ring" cx="8" cy="8" r="6.6"/></svg><span class="tlbl">theme</span></button>
+      <button class="tty-btn theme-btn" type="button" data-theme-menu aria-haspopup="menu" aria-expanded="false" aria-label="Change colour theme or CRT intensity"><svg class="tdot" viewBox="0 0 16 16" aria-hidden="true"><circle class="t-bg" cx="8" cy="8" r="6.6"/><path class="t-fill" d="M8 1.4a6.6 6.6 0 0 1 0 13.2z"/><circle class="t-ring" cx="8" cy="8" r="6.6"/></svg><span class="tlbl">theme</span></button>
       <a class="tty-btn" href="#studio">${T("nav.topStudio")}</a>
       <button class="tty-btn" type="button" data-open-tty>${T("nav.topTty")} <kbd aria-hidden="true">\`</kbd></button>
       <button class="tty-btn alios-boot" type="button" data-startx aria-label="Boot AliOS">boot AliOS</button>
@@ -2056,7 +2056,7 @@
     function renderStudioChrome() {
         $("#studioTop").innerHTML = `
     <a class="pill glass glow brand" href="#top"><span class="brand-mark" aria-hidden="true">←</span><span><b>${T("studio.back")}</b>${T("studio.backSub", "small")}</span></a>
-    <div class="top-right"><button class="tty-btn theme-btn" type="button" data-theme-menu aria-haspopup="menu" aria-expanded="false" aria-label="Change colour theme"><svg class="tdot" viewBox="0 0 16 16" aria-hidden="true"><circle class="t-bg" cx="8" cy="8" r="6.6"/><path class="t-fill" d="M8 1.4a6.6 6.6 0 0 1 0 13.2z"/><circle class="t-ring" cx="8" cy="8" r="6.6"/></svg><span class="tlbl">theme</span></button><button class="tty-btn" type="button" data-open-tty>${T("nav.topTty")}</button></div>`;
+    <div class="top-right"><button class="tty-btn theme-btn" type="button" data-theme-menu aria-haspopup="menu" aria-expanded="false" aria-label="Change colour theme or CRT intensity"><svg class="tdot" viewBox="0 0 16 16" aria-hidden="true"><circle class="t-bg" cx="8" cy="8" r="6.6"/><path class="t-fill" d="M8 1.4a6.6 6.6 0 0 1 0 13.2z"/><circle class="t-ring" cx="8" cy="8" r="6.6"/></svg><span class="tlbl">theme</span></button><button class="tty-btn" type="button" data-open-tty>${T("nav.topTty")}</button></div>`;
         $("#studioHero").innerHTML =
             `<p class="eyebrow"><b>~/</b>${T("studio.eyebrow")}</p>
     <h1>${T("studio.title1")} <em>${T("studio.titleEm")}</em> ${T("studio.title2")}</h1>${T("studio.intro", "p")}
@@ -3509,18 +3509,36 @@
             applyPalette.last = p;
             dispatchEvent(new CustomEvent("theme:used", {detail: p}));
         }
+        const crtBefore = document.documentElement.dataset.crt || "";
         syncCrt();
+        const crtAfter = document.documentElement.dataset.crt || "";
+        if (crtBefore && crtBefore !== crtAfter)
+            dispatchEvent(new CustomEvent("crt:change", {detail: crtAfter}));
     }
     function renderThemeMenu() {
         const m = $("#themeMenu");
         if (!m) return;
         const p = currentPalette();
-        m.innerHTML = Object.entries(THEMES)
-            .map(
-                ([k, t]) =>
-                    `<button type="button" role="menuitemradio" aria-checked="${k === p}" data-theme-set="${k}"><span class="sw" aria-hidden="true">${t.sw.map((c) => `<i style="background:${c}"></i>`).join("")}</span>${t.label}${!editing && k === C.theme ? ' <small style="color:var(--dim)">default</small>' : ""}</button>`,
-            )
-            .join("");
+        const lv = window.Crt ? window.Crt.level(p) : "off";
+        const crtLabel = {off: "Off", soft: "Soft", full: "Full"};
+        const crtHint = {
+            off: "No CRT effect",
+            soft: "Still scanlines and a light vignette",
+            full: "Scanlines, grain, glow and vignette",
+        };
+        m.innerHTML =
+            Object.entries(THEMES)
+                .map(
+                    ([k, t]) =>
+                        `<button type="button" role="menuitemradio" aria-checked="${k === p}" data-theme-set="${k}"><span class="sw" aria-hidden="true">${t.sw.map((c) => `<i style="background:${c}"></i>`).join("")}</span>${t.label}${!editing && k === C.theme ? ' <small style="color:var(--dim)">default</small>' : ""}</button>`,
+                )
+                .join("") +
+            `<div class="crt-ctrl" role="radiogroup" aria-label="CRT intensity"><span class="crt-kicker">CRT</span>${["off", "soft", "full"]
+                .map(
+                    (id) =>
+                        `<button type="button" role="radio" data-crt-set="${id}" aria-checked="${id === lv}" title="${crtHint[id]}">${crtLabel[id]}</button>`,
+                )
+                .join("")}</div>`;
     }
     function setVisitorTheme(k) {
         if (!THEMES[k]) return;
@@ -3582,6 +3600,12 @@
             closeThemeMenu();
             return;
         }
+        const crtPick = e.target.closest && e.target.closest("[data-crt-set]");
+        if (crtPick && window.Crt) {
+            e.preventDefault();
+            window.Crt.set(crtPick.dataset.crtSet);
+            return;
+        }
         if (!$("#themeMenu").hidden && !e.target.closest("#themeMenu"))
             closeThemeMenu();
     });
@@ -3635,55 +3659,24 @@
             sw: ["#04140c", "#0d241b", "#62ffb4", "#d6ff73"],
         },
     };
-    /* A quiet grain over the CRT theme. One small canvas, paused when the
-       tab is hidden, AliOS is up, or the visitor asked for less motion. */
-    let crtTimer = 0;
+    /* CRT intensity is shared with AliOS. js/crt.js owns the stored value,
+       the page layers, and the grain canvas. */
     function syncCrt() {
-        let veil = document.getElementById("crtVeil");
-        let grain = document.getElementById("crtGrain");
-        if (!veil) {
-            veil = document.createElement("div");
-            veil.id = "crtVeil";
-            veil.setAttribute("aria-hidden", "true");
-            document.body.appendChild(veil);
-        }
-        if (!grain) {
-            grain = document.createElement("canvas");
-            grain.id = "crtGrain";
-            grain.setAttribute("aria-hidden", "true");
-            document.body.appendChild(grain);
-        }
-        const on = document.documentElement.dataset.palette === "crt"
-            && !document.body.classList.contains("alios");
-        const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-        clearInterval(crtTimer);
-        crtTimer = 0;
-        if (!on) return;
-        const ctx = grain.getContext("2d", { alpha: true });
-        const paint = () => {
-            const w = 96, h = 64;
-            if (grain.width !== w) { grain.width = w; grain.height = h; }
-            const img = ctx.createImageData(w, h);
-            const data = img.data;
-            for (let i = 0; i < data.length; i += 4) {
-                const n = 140 + Math.random() * 115;
-                data[i] = n; data[i + 1] = n; data[i + 2] = n; data[i + 3] = 36;
-            }
-            ctx.putImageData(img, 0, 0);
-        };
-        paint();
-        if (reduceMotion || document.hidden) return;
-        crtTimer = setInterval(() => {
-            if (document.hidden || document.body.classList.contains("alios")
-                || document.documentElement.dataset.palette !== "crt") {
-                clearInterval(crtTimer);
-                crtTimer = 0;
-                return;
-            }
-            paint();
-        }, 140);
+        if (!window.Crt) return;
+        window.Crt.sync(currentPalette(), {
+            hide() {
+                return document.body.classList.contains("alios");
+            },
+        });
+        const m = $("#themeMenu");
+        if (!m) return;
+        const lv = window.Crt.level(currentPalette());
+        m.querySelectorAll("[data-crt-set]").forEach((b) => {
+            b.setAttribute("aria-checked", b.dataset.crtSet === lv ? "true" : "false");
+        });
     }
-    document.addEventListener("visibilitychange", () => syncCrt());
+    addEventListener("crt:change", () => syncCrt());
+    addEventListener("alios:state", () => syncCrt());
     function openPanel(tab, item) {
         if (item) panelItem = item;
         panelTab = tab;

@@ -116,11 +116,28 @@
                 ]
             }
         </script>
+        <script>
+            /* Theme and CRT intensity before first paint. an.theme is JSON;
+               an.crt is a plain off | soft | full string. */
+            try {
+                var theme = JSON.parse(localStorage.getItem("an.theme") || "null");
+                if (typeof theme === "string") document.documentElement.dataset.palette = theme;
+                var crt = localStorage.getItem("an.crt");
+                if (crt !== "off" && crt !== "soft" && crt !== "full") {
+                    var legacy = localStorage.getItem("an.alios.crt");
+                    if (legacy === "off" || legacy === "soft") crt = legacy;
+                }
+                if (crt !== "off" && crt !== "soft" && crt !== "full" && theme === "crt") crt = "full";
+                if (crt === "soft" || crt === "full" || crt === "off")
+                    document.documentElement.dataset.crt = crt;
+            } catch (e) {}
+        </script>
         <link rel="stylesheet" href="css/main.css" />
         <link rel="stylesheet" href="css/mini.css" />
         <link rel="stylesheet" href="css/eggs.css" />
         <link rel="stylesheet" href="css/mergify.css" />
         <script src="js/achievements.js" defer></script>
+        <script src="js/crt.js" defer></script>
         <script src="js/app.js" defer></script>
         <script src="js/bitnotes.js" defer></script>
         <script src="js/mini.js" defer></script>
@@ -145,7 +162,7 @@
       <span><b><span data-edit="site.first">Ali</span> <span class="sl">/</span> <span data-edit="site.last">Nategh</span></b><small data-edit="site.tagline">software engineer · toronto</small></span></a>
     <div class="top-right">
       <div class="pill glass status"><i class="dot" aria-hidden="true"></i><span><span data-edit="site.status">open to work</span><span class="long"> · <span data-edit="site.statusLong">full-stack · HTTP APIs · GTA</span></span></span></div>
-      <button class="tty-btn theme-btn" type="button" data-theme-menu="" aria-haspopup="menu" aria-expanded="false" aria-label="Change colour theme"><svg class="tdot" viewBox="0 0 16 16" aria-hidden="true"><circle class="t-bg" cx="8" cy="8" r="6.6"></circle><path class="t-fill" d="M8 1.4a6.6 6.6 0 0 1 0 13.2z"></path><circle class="t-ring" cx="8" cy="8" r="6.6"></circle></svg><span class="tlbl">theme</span></button>
+      <button class="tty-btn theme-btn" type="button" data-theme-menu="" aria-haspopup="menu" aria-expanded="false" aria-label="Change colour theme or CRT intensity"><svg class="tdot" viewBox="0 0 16 16" aria-hidden="true"><circle class="t-bg" cx="8" cy="8" r="6.6"></circle><path class="t-fill" d="M8 1.4a6.6 6.6 0 0 1 0 13.2z"></path><circle class="t-ring" cx="8" cy="8" r="6.6"></circle></svg><span class="tlbl">theme</span></button>
       <a class="tty-btn" href="#studio"><span data-edit="nav.topStudio">♪ studio</span></a>
       <button class="tty-btn" type="button" data-open-tty=""><span data-edit="nav.topTty">~/tty</span> <kbd aria-hidden="true">`</kbd></button>
       <button class="tty-btn alios-boot" type="button" data-startx="" aria-label="Boot AliOS">boot AliOS</button>
@@ -375,7 +392,7 @@
         <main id="studio" class="wrap" hidden>
             <header class="topbar" id="studioTop">
     <a class="pill glass glow brand" href="#top"><span class="brand-mark" aria-hidden="true">←</span><span><b><span data-edit="studio.back">back to the site</span></b><small data-edit="studio.backSub">ali nategh · studio</small></span></a>
-    <div class="top-right"><button class="tty-btn theme-btn" type="button" data-theme-menu="" aria-haspopup="menu" aria-expanded="false" aria-label="Change colour theme"><svg class="tdot" viewBox="0 0 16 16" aria-hidden="true"><circle class="t-bg" cx="8" cy="8" r="6.6"></circle><path class="t-fill" d="M8 1.4a6.6 6.6 0 0 1 0 13.2z"></path><circle class="t-ring" cx="8" cy="8" r="6.6"></circle></svg><span class="tlbl">theme</span></button><button class="tty-btn" type="button" data-open-tty=""><span data-edit="nav.topTty">~/tty</span></button></div></header>
+    <div class="top-right"><button class="tty-btn theme-btn" type="button" data-theme-menu="" aria-haspopup="menu" aria-expanded="false" aria-label="Change colour theme or CRT intensity"><svg class="tdot" viewBox="0 0 16 16" aria-hidden="true"><circle class="t-bg" cx="8" cy="8" r="6.6"></circle><path class="t-fill" d="M8 1.4a6.6 6.6 0 0 1 0 13.2z"></path><circle class="t-ring" cx="8" cy="8" r="6.6"></circle></svg><span class="tlbl">theme</span></button><button class="tty-btn" type="button" data-open-tty=""><span data-edit="nav.topTty">~/tty</span></button></div></header>
             <section class="studio-hero" id="studioHero"><p class="eyebrow"><b>~/</b><span data-edit="studio.eyebrow">studio</span></p>
     <h1><span data-edit="studio.title1">The</span> <em><span data-edit="studio.titleEm">music</span></em> <span data-edit="studio.title2">room.</span></h1><p data-edit="studio.intro">Write a melody on the staff, choose an instrument, and press play. Click the staff or the keyboard to add notes, drag a note up or down to change its pitch, and sign it with your name before you save.</p>
     <div class="studio-links"><p class="eyebrow"><b>♪</b> <span data-edit="studio.linksLabel">Hear more of my music</span></p><div class="links"><span class="link-wrap" data-item="studio.links" data-idx="0"><div class="adm item-tools" role="group" aria-label="Item tools"><button type="button" data-act="up" title="Move earlier" aria-label="Move earlier">↑</button><button type="button" data-act="down" title="Move later" aria-label="Move later">↓</button><button type="button" data-act="edit" title="Edit all fields" aria-label="Edit all fields">✎</button><button type="button" data-act="dup" title="Duplicate" aria-label="Duplicate">⧉</button><button type="button" class="del" data-act="del" title="Delete" aria-label="Delete">✕</button></div><a class="btn claret" href="https://open.spotify.com/artist/1CHSJfFKd4UCEoLyvLUkPx?si=vjbDSP1OQ8WdtowOOZJjeg&amp;utm_source=copy-link" target="_blank" rel="noopener"><span data-edit="studio.links.0.label">▶ Spotify · Ali Nategh</span> ↗</a></span><span class="link-wrap" data-item="studio.links" data-idx="1"><div class="adm item-tools" role="group" aria-label="Item tools"><button type="button" data-act="up" title="Move earlier" aria-label="Move earlier">↑</button><button type="button" data-act="down" title="Move later" aria-label="Move later">↓</button><button type="button" data-act="edit" title="Edit all fields" aria-label="Edit all fields">✎</button><button type="button" data-act="dup" title="Duplicate" aria-label="Duplicate">⧉</button><button type="button" class="del" data-act="del" title="Delete" aria-label="Delete">✕</button></div><a class="btn claret" href="https://www.youtube.com/@AllinBeats" target="_blank" rel="noopener"><span data-edit="studio.links.1.label">▶ YouTube · @AllinBeats</span> ↗</a></span><span class="link-wrap" data-item="studio.links" data-idx="2"><div class="adm item-tools" role="group" aria-label="Item tools"><button type="button" data-act="up" title="Move earlier" aria-label="Move earlier">↑</button><button type="button" data-act="down" title="Move later" aria-label="Move later">↓</button><button type="button" data-act="edit" title="Edit all fields" aria-label="Edit all fields">✎</button><button type="button" data-act="dup" title="Duplicate" aria-label="Duplicate">⧉</button><button type="button" class="del" data-act="del" title="Delete" aria-label="Delete">✕</button></div><a class="btn claret" href="https://www.instagram.com/allin.beats" target="_blank" rel="noopener"><span data-edit="studio.links.2.label">Instagram · @allin.beats</span> ↗</a></span><button type="button" class="adm add-item" data-add="studio.links">+ add link</button></div></div>

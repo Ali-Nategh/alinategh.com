@@ -126,50 +126,26 @@
     return innerWidth < 900 || innerHeight < 640;
   }
   function readCrt() {
-    try {
-      const v = localStorage.getItem("an.alios.crt");
-      if (v === "off" || v === "soft" || v === "full") return v;
-    } catch { /* private mode */ }
-    return "full";
+    const theme = document.documentElement.dataset.palette || "navy";
+    if (window.Crt) return window.Crt.level(theme);
+    return theme === "crt" ? "full" : "off";
   }
-  function setCrt(level) {
+  function applyCrt(level) {
     if (!shell || !["off", "soft", "full"].includes(level)) return;
     shell.dataset.crt = level;
-    try { localStorage.setItem("an.alios.crt", level); } catch { /* private mode */ }
     grainStop();
-    if (level === "full") grainStop = startGrain();
-  }
-  function startGrain() {
+    grainStop = () => {};
+    if (level !== "full" || !window.Crt) return;
     const canvas = shell.querySelector(".os-grain");
-    if (!canvas) return () => {};
-    const ctx = canvas.getContext("2d", { alpha: true });
-    let timer = 0;
-    let dead = false;
-    const paint = () => {
-      if (dead) return;
-      const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const hidden = document.hidden || shell.hidden || shell.dataset.crt !== "full";
-      if (reduceMotion || hidden) {
-        timer = setTimeout(paint, 400);
-        return;
-      }
-      const w = 96;
-      const h = 64;
-      if (canvas.width !== w) { canvas.width = w; canvas.height = h; }
-      const img = ctx.createImageData(w, h);
-      const data = img.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const n = Math.random() * 255;
-        data[i] = n;
-        data[i + 1] = n;
-        data[i + 2] = n;
-        data[i + 3] = 28;
-      }
-      ctx.putImageData(img, 0, 0);
-      timer = setTimeout(paint, 90);
-    };
-    paint();
-    return () => { dead = true; clearTimeout(timer); };
+    grainStop = window.Crt.grain(canvas, () => {
+      return !!(shell && !shell.hidden && shell.dataset.crt === "full");
+    });
+  }
+  function paintCrtRadios(level) {
+    if (!shell) return;
+    shell.querySelectorAll("[data-crt]").forEach((b) => {
+      b.setAttribute("aria-checked", b.dataset.crt === level ? "true" : "false");
+    });
   }
 
   function ensure() {
@@ -184,7 +160,7 @@
       '<span class="os-brand">AliOS</span>' +
       '<span class="os-front"></span>' +
       '<span class="os-gap"></span>' +
-      '<button type="button" class="os-theme" data-theme-menu aria-haspopup="menu" aria-expanded="false" aria-label="Change colour theme">theme</button>' +
+      '<button type="button" class="os-theme" data-theme-menu aria-haspopup="menu" aria-expanded="false" aria-label="Change colour theme or CRT intensity">theme</button>' +
       '<time class="os-clock"></time>' +
       '<button type="button" class="os-logout">log out</button>' +
       "</header>" +
@@ -248,7 +224,7 @@
       e.preventDefault();
       showPhone(null);
     });
-    setCrt(readCrt());
+    applyCrt(readCrt());
     const icons = shell.querySelector(".os-icons");
     const apps = shell.querySelector(".os-dock-apps");
     APPS.forEach((app) => {
@@ -834,7 +810,7 @@
   function boot() {
     if (on) return;
     ensure();
-    setCrt(readCrt());
+    applyCrt(readCrt());
     on = true;
     shell.hidden = false;
     document.body.classList.add("alios");
@@ -906,7 +882,16 @@
     open("piano");
     setTimeout(() => { if (window.EchoGame) EchoGame.start(); }, 40);
   });
-  addEventListener("alios:crt", (e) => setCrt(e.detail));
+  addEventListener("alios:crt", (e) => {
+    if (window.Crt) window.Crt.set(e.detail);
+    else applyCrt(e.detail);
+  });
+  addEventListener("crt:change", (e) => {
+    const level = e.detail;
+    if (!["off", "soft", "full"].includes(level)) return;
+    applyCrt(level);
+    paintCrtRadios(level);
+  });
 
   window.AliOS = { boot, logout, shutdown, reboot, open, running: () => on };
 })();
