@@ -1,0 +1,45 @@
+# Keeps the copy of content.json baked into index.html in step with the file.
+# Runs after a push to main that changes content.json, app.js or the prerender
+# script, then commits index.html if the baked markup changed.
+name: Bake content into index.html
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - content.json
+      - js/app.js
+      - tools/prerender.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bake
+  cancel-in-progress: true
+
+jobs:
+  bake:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Prerender index.html from content.json
+        run: node tools/prerender.mjs
+
+      - name: Commit index.html if it changed
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "index.html is already in step with content.json"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Bake content.json into index.html"
+          git push

@@ -1,11 +1,12 @@
 /* Self-hosted text faces. Noto Music is not here: css/music-font.css is added only when notation is drawn.
-   font-display: optional keeps a late download from swapping the hero out from under the first paint.
-   The fallback faces are metric-matched to Fraunces and IBM Plex Mono so the stand-in occupies the same box. */
+   Fraunces uses font-display: swap, so the name and headings always end in the real face; its metric-matched
+   fallback keeps that swap close to still. IBM Plex Mono, which sets all the running text, uses optional:
+   on a slow first visit the body stays in its matched fallback instead of reflowing every paragraph. */
 @font-face {
   font-family: "Fraunces";
   font-style: normal;
   font-weight: 400 800;
-  font-display: optional;
+  font-display: swap;
   src: url("../assets/fonts/fraunces-roman.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
@@ -13,7 +14,7 @@
   font-family: "Fraunces";
   font-style: italic;
   font-weight: 400 700;
-  font-display: optional;
+  font-display: swap;
   src: url("../assets/fonts/fraunces-italic.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }

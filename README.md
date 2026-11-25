@@ -170,7 +170,7 @@ His hair, skin, jacket, glasses and beard can be changed from the editor (`C.min
 <summary><b>Accessibility, performance and SEO</b></summary>
 
 - **Accessibility:** semantic landmarks, labelled controls, `aria-pressed` toggles, a keyboard-navigable theme menu (`menuitemradio`), and visible focus rings. The terminal is a labelled modal dialog. All animations respect `prefers-reduced-motion`.
-- **Performance:** the canvases pause when the tab is hidden, the background runs at a capped frame rate, and resize work is debounced. Text fonts are self-hosted woff2 files with metric-matched fallbacks and `font-display: optional`, so a slow download cannot shove the hero down the page. Noto Music is requested only when the studio opens or the binary notes need a glyph.
+- **Performance:** the canvases pause when the tab is hidden, the background runs at a capped frame rate, and resize work is debounced. Text fonts are self-hosted woff2 files with metric-matched fallbacks. Fraunces uses `font-display: swap`, so the name and headings always end in the real face, and the matched fallback keeps that swap nearly still. IBM Plex Mono, which sets the running text, uses `optional`, so a slow first visit never reflows every paragraph. Noto Music is requested only when the studio opens or the binary notes need a glyph.
 - **SEO:** a meta description, a canonical URL, Open Graph and Twitter cards with a generated 1200 × 630 preview image, `schema.org/Person` JSON-LD, `robots.txt` and `sitemap.xml`.
 
 </details>
@@ -227,7 +227,9 @@ python3 -m http.server 8000      # Windows: python -m http.server 8000   ·   or
 
 Then open <http://localhost:8000>, and <http://localhost:8000/#admin> to edit.
 
-After you change `content.json`, refresh the copy baked into `index.html` so the first paint and link previews stay in step with the file. This is not part of the deploy. It needs Chrome or Chromium. The script looks for `google-chrome`, `chromium`, and the usual macOS app path. If yours lives somewhere else:
+`index.html` carries a baked copy of `content.json`, so the first paint and link previews show the real content. You don't have to refresh it by hand: when a push to `main` changes `content.json`, `js/app.js` or the prerender script, the **Bake content into index.html** GitHub Action runs `tools/prerender.mjs` and commits the result (so `git pull` before your next push). If the bake is ever behind, nothing breaks: the page notices and renders from `content.json`.
+
+To bake locally instead, you need Chrome or Chromium. The script looks for `google-chrome`, `chromium`, the usual Windows install folders and the macOS app path. If yours lives somewhere else:
 
 ```bash
 node tools/prerender.mjs
@@ -245,15 +247,17 @@ docker compose up -d             # serves on :8080; put Caddy or Certbot in fron
 
 The Docker nginx config compresses text, makes browsers revalidate `index.html`, `content.json`, CSS and JS on every visit (so a deploy shows up immediately), caches images and fonts for a month, adds security headers, refuses to serve `tools/`, `deploy/`, `docs/` and the README, and answers unknown URLs with `404.html`.
 
-The live VPS does not use that file. `nginx/conf.d/portfolio.conf` is the server people actually hit: it terminates TLS, sets HSTS, rate-limits, and serves the files from `/usr/share/nginx/portfolio` itself. It is not a proxy in front of the container, so nothing in `deploy/nginx.conf` applies there. Its `try_files … =404` also has no `error_page`, which is why an unknown URL shows nginx's own 404 instead of `404.html`.
+The live VPS does not use that file. There, `nginx/conf.d/portfolio.conf` is the server people actually hit: it terminates TLS, sets HSTS and the other security headers, rate-limits, and serves the files from `/usr/share/nginx/portfolio` itself. It is not a proxy in front of the container, so nothing in `deploy/nginx.conf` applies there.
 
-Keep `portfolio.conf` as the security config. Inside the `listen 443` server only, replace the `location /` block with the site snippet (it brings the lost page and hides `deploy/`, `tools/`, and `docs/`). Leave the SSL lines, `limit_req`, the HSTS and framing headers, the port-80 redirect, and the handshake-reject default server as they are.
+`portfolio.conf` keeps the security side: the SSL lines, `limit_req`, the HSTS and framing headers, the port-80 redirect and the handshake-reject default server. Everything about the site lives in `deploy/portfolio.inc.conf`: compression, caching (`expires`, so the security headers still apply), the lost page for unknown URLs, and hiding dotfiles, `deploy/`, `tools/`, `docs/` and the README. Inside the `listen 443` server, that one line replaces the site's own `gzip` and `location` lines:
 
 ```nginx
 include /usr/share/nginx/portfolio/deploy/portfolio.inc.conf;
 ```
 
-Then `nginx -t` and reload. Do not include `deploy/nginx.conf`. That is a complete server block for Docker, and swapping it in would drop HSTS and change `X-Frame-Options` from `DENY` to `SAMEORIGIN`. The snippet sets no `add_header` of its own, so the headers on the 443 server keep applying. A location that adds its own header would discard them.
+Then `nginx -t` and reload. Do not include `deploy/nginx.conf`: it is a complete server block for Docker, and would drop HSTS and change `X-Frame-Options` from `DENY` to `SAMEORIGIN`.
+
+A first visit makes about 20 requests (page, CSS, JS, fonts, content). Keep the `limit_req` burst comfortably above that, for example `burst=60 nodelay`, or a visitor who lands on the lost page and clicks straight home can hit the limit and get 503s.
 
 **GitHub Pages / Netlify / Cloudflare Pages:** point them at the repo root. No build command is needed.
 
