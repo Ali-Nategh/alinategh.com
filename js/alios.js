@@ -162,7 +162,7 @@
       '<span class="os-gap"></span>' +
       '<button type="button" class="os-theme" data-theme-menu aria-haspopup="menu" aria-expanded="false" aria-label="Change colour theme or CRT intensity">theme</button>' +
       '<time class="os-clock"></time>' +
-      '<button type="button" class="os-logout">log out</button>' +
+      '<button type="button" class="tty-btn os-logout">log out</button>' +
       "</header>" +
       '<div class="os-desk">' +
       '<div class="os-icons" role="toolbar" aria-label="Desktop"></div>' +
@@ -175,14 +175,14 @@
       '<button type="button" class="os-phone-back" hidden>home</button>' +
       '<span class="os-phone-title">AliOS</span>' +
       '<time class="os-phone-clock"></time>' +
-      '<button type="button" class="os-phone-out">log out</button>' +
+      '<button type="button" class="tty-btn os-phone-out">log out</button>' +
       "</header>" +
       '<div class="os-phone-home"></div>' +
       '<div class="os-phone-app" hidden></div>' +
       '<button type="button" class="os-phone-homebar">home</button>' +
       "</div>" +
       '<canvas class="os-grain" aria-hidden="true"></canvas>' +
-      '<div class="os-scan" aria-hidden="true"></div>' +
+      '<div class="os-scan" aria-hidden="true"><div class="os-scan-lines"></div><div class="os-scan-refresh"></div></div>' +
       '<div class="os-vignette" aria-hidden="true"></div>' +
       '<div class="os-boot" hidden>' +
       '<div class="os-boot-log" role="status" aria-live="polite"></div>' +
@@ -810,10 +810,11 @@
   function boot() {
     if (on) return;
     ensure();
-    applyCrt(readCrt());
     on = true;
     shell.hidden = false;
     document.body.classList.add("alios");
+    if (window.Crt && window.Crt.hold) window.Crt.hold("full");
+    else applyCrt("full");
     dispatchEvent(new Event("alios:state"));
     startClock();
     chime("boot");
@@ -849,6 +850,7 @@
     closeAll();
     stopClock();
     unpark();
+    if (window.Crt && window.Crt.release) window.Crt.release();
     grainStop();
     on = false;
     miniOn = false;

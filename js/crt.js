@@ -4,6 +4,8 @@
    stored, the green CRT theme uses Full and every other theme uses Off.
    AliOS used to write "full" on every boot, so that legacy value is not
    treated as a choice. "soft" and "off" from the old key are.
+   While AliOS is open it can hold Full without writing it. An explicit
+   choice clears that hold and is what both screens keep.
    Part of alinategh.com. Plain browser JavaScript, no build step. */
 (() => {
   "use strict";
@@ -12,6 +14,12 @@
   const LEGACY = "an.alios.crt";
   const LEVELS = ["off", "soft", "full"];
   let pageStop = () => {};
+  let held = null;
+
+  const root = document.documentElement;
+  const pause = () => root.classList.toggle("crt-paused", document.hidden);
+  document.addEventListener("visibilitychange", pause);
+  pause();
 
   function stored() {
     try {
@@ -27,66 +35,34 @@
   }
 
   function level(theme) {
+    if (held) return held;
     return stored() || (theme === "crt" ? "full" : "off");
   }
 
   function set(next) {
     if (!LEVELS.includes(next)) return;
+    held = null;
     try { localStorage.setItem(KEY, next); } catch { /* private mode */ }
     dispatchEvent(new CustomEvent("crt:change", { detail: next }));
   }
 
-  /* One small canvas, stretched by CSS. Still when the visitor asked for
-     less motion, and paused while the tab is hidden. */
-  function grain(canvas, running) {
-    if (!canvas) return () => {};
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return () => {};
-    const ctx = canvas.getContext("2d", { alpha: true });
-    if (!ctx) return () => {};
-    let timer = 0;
-    let dead = false;
-    const paint = () => {
-      const w = 96;
-      const h = 64;
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-      }
-      const img = ctx.createImageData(w, h);
-      const data = img.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const n = 160 + ((Math.random() * 80) | 0);
-        data[i] = n;
-        data[i + 1] = n;
-        data[i + 2] = n;
-        data[i + 3] = 32;
-      }
-      ctx.putImageData(img, 0, 0);
-    };
-    const step = () => {
-      if (dead) return;
-      if (document.hidden || !running()) {
-        clearTimeout(timer);
-        timer = 0;
-        return;
-      }
-      paint();
-      const slow = matchMedia("(max-width: 800px)").matches;
-      timer = setTimeout(step, slow ? 260 : 140);
-    };
-    const onVis = () => {
-      if (dead) return;
-      clearTimeout(timer);
-      timer = 0;
-      if (!document.hidden) step();
-    };
-    document.addEventListener("visibilitychange", onVis);
-    step();
-    return () => {
-      dead = true;
-      clearTimeout(timer);
-      document.removeEventListener("visibilitychange", onVis);
-    };
+  /* AliOS calls hold("full") on boot and release() on exit.
+     Neither writes localStorage. set() is the visitor's choice. */
+  function hold(next) {
+    if (!LEVELS.includes(next)) return;
+    held = next;
+    dispatchEvent(new CustomEvent("crt:change", { detail: next }));
+  }
+
+  function release() {
+    held = null;
+    const theme = document.documentElement.dataset.palette || "";
+    dispatchEvent(new CustomEvent("crt:change", { detail: level(theme) }));
+  }
+
+  /* Full CRT is the scanlines and the refresh band. No grain canvas. */
+  function grain() {
+    return () => {};
   }
 
   function ensure() {
@@ -104,6 +80,14 @@
       canvas.id = "crtGrain";
       canvas.setAttribute("aria-hidden", "true");
       document.body.append(scan, vig, canvas);
+    }
+    if (scan && !scan.querySelector(".crt-lines")) {
+      scan.textContent = "";
+      const lines = document.createElement("div");
+      lines.className = "crt-lines";
+      const band = document.createElement("div");
+      band.className = "crt-refresh";
+      scan.append(lines, band);
     }
     const old = document.getElementById("crtVeil");
     if (old) old.remove();
@@ -126,5 +110,5 @@
     return lv;
   }
 
-  window.Crt = { level, set, sync, grain };
+  window.Crt = { level, set, sync, grain, hold, release };
 })();

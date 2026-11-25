@@ -3524,7 +3524,7 @@
         const crtHint = {
             off: "No CRT effect",
             soft: "Still scanlines and a light vignette",
-            full: "Scanlines, grain, glow and vignette",
+            full: "Rolling scanlines, a refresh band, glow and vignette",
         };
         m.innerHTML =
             Object.entries(THEMES)
@@ -5104,6 +5104,7 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
             themes: Object.entries(THEMES).map(([id, t]) => ({
                 id,
                 label: t.label,
+                sw: t.sw,
             })),
         });
     });
