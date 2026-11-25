@@ -105,6 +105,7 @@
   let last = 0, nextSpawn = 0;
   function frame(now) {
     if (document.hidden) { requestAnimationFrame(frame); return; }
+    if (document.body.classList.contains('alios')) { setTimeout(() => requestAnimationFrame(frame), 500); return; }
     if (now - last < 33) { requestAnimationFrame(frame); return; }  // ~30 fps is plenty for a background
     last = now;
     if (now >= nextSpawn) { spawn(now); nextSpawn = now + (now < hotUntil ? rand(500, 1100) : rand(900, 2600)); }

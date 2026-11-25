@@ -269,9 +269,14 @@
   }
 
   /* ---------- where he stands ---------- */
-  let vw = innerWidth, vh = innerHeight, S = 3, narrow = false;
+  let vw = innerWidth, vh = innerHeight, S = 3, narrow = false, laneEl = null;
+  function laneRect() {
+    if (!laneEl || !laneEl.isConnected) return null;
+    const r = laneEl.getBoundingClientRect();
+    return r.width > 40 ? r : null;
+  }
   function measure() {
-    vw = innerWidth; vh = innerHeight; narrow = vw < 900; S = narrow ? 2 : 3;
+    vw = innerWidth; vh = innerHeight; narrow = vw < 900; S = laneEl ? 2 : narrow ? 2 : 3;
     cv.style.width = GW * S + 'px'; cv.style.height = GH * S + 'px';
   }
   measure();
@@ -280,9 +285,18 @@
   const edgeX = sd => sd === 'L' ? -19 * S : vw + 19 * S;
   const waveX = sd => sd === 'L' ? 12 * S : vw - 12 * S;
   const visitX = sd => sd === 'L' ? 16 * S : vw - 16 * S;      // small screens: fully visible, close to the edge
-  const homeX = sd => { if (narrow) return peekX(sd); const m = Math.max(13 * S, Math.min(gutter() / 2, 150)); return sd === 'L' ? m : vw - m; };
+  const homeX = sd => {
+    const r = laneRect();
+    if (r) {
+      const pad = 28;
+      return sd === 'L' ? r.left + pad : Math.max(r.left + pad + 48, r.right - pad);
+    }
+    if (narrow) return peekX(sd);
+    const m = Math.max(13 * S, Math.min(gutter() / 2, 150));
+    return sd === 'L' ? m : vw - m;
+  };
   const AT = { home: homeX, peek: peekX, edge: edgeX, wave: waveX, visit: visitX };
-  const footY = () => vh - (narrow ? 6 : 30);
+  const footY = () => { const r = laneRect(); return r ? r.bottom - 6 : vh - (narrow ? 6 : 30); };
   const other = sd => sd === 'L' ? 'R' : 'L';
 
   let side = Math.random() < .5 ? 'L' : 'R', pos = { x: edgeX(side) };
@@ -350,6 +364,12 @@
     ]
   };
   function waveSeq() {
+    if (laneRect()) {
+      return [
+        { frames: ['wave1', 'wave2'], fd: 170, reps: 4, face: 'in', wave: true, at: 'here', onStart: () => { speed = 1; showBubble(); } },
+        { frames: ['smile'], fd: 650, reps: 1, face: 'in', wave: true, at: 'here', onEnd: hideBubble }
+      ];
+    }
     const s = [];
     if (narrow) s.push({ frames: WALK, fd: 110, move: () => waveX(side), dur: 420, face: 'in' });
     s.push({ frames: ['wave1', 'wave2'], fd: 170, reps: 4, face: 'in', wave: true, at: narrow ? 'wave' : 'here', onStart: () => { speed = 1; showBubble(); } });
@@ -361,6 +381,17 @@
   function plan() {
     if (['music', 'pushups', 'coding', 'visit', 'wave'].includes(lastAct) && !document.hidden) {
       dispatchEvent(new CustomEvent('mini:saw', { detail: lastAct }));
+    }
+    if (laneRect()) {
+      if (reduce) { queue = [{ frames: ['idle0'], fd: 5000, reps: 1, face: 'in', at: 'home' }]; return; }
+      if (lastAct !== 'idle') {
+        lastAct = 'idle';
+        queue = [{ frames: ['idle0', 'idle0', 'idle1', 'idle1'], fd: 420, reps: rint(2, 5), skip: true, face: 'in', at: 'home' }];
+        return;
+      }
+      lastAct = 'swap'; lastPick = 'swap';
+      queue = ACTIVITIES.swap();
+      return;
     }
     if (reduce) { queue = [{ frames: ['idle0'], fd: 5000, reps: 1, face: 'in', at: narrow ? 'peek' : 'home' }]; return; }
     if (lastAct !== 'idle') { lastAct = 'idle'; queue = idleSeq(); return; }
@@ -474,15 +505,38 @@
   function run() { if (!cur || running || document.hidden || root.hidden) return; running = true; last = performance.now(); requestAnimationFrame(frame); }
   document.addEventListener('visibilitychange', run);
   addEventListener('mini:config', run);
-  addEventListener('resize', () => { const was = narrow; measure(); if (cur && !cur.p.move) pos.x = AT[cur.p.at && cur.p.at !== 'here' ? cur.p.at : (narrow ? 'peek' : 'home')](side); if (was !== narrow) { queue = []; lastAct = 'enter'; next(); } hitKey = ''; dirty = true; });
+  addEventListener('resize', () => { const was = narrow; measure(); if (cur && !cur.p.move) pos.x = AT[cur.p.at && cur.p.at !== 'here' ? cur.p.at : (narrow ? 'peek' : 'home')](side); if (was !== narrow && !laneEl) { queue = []; lastAct = 'enter'; next(); } hitKey = ''; dirty = true; });
+
+  function setLane(el) {
+    laneEl = el || null;
+    root.classList.toggle('mini-lane', !!laneEl);
+    measure();
+    hitKey = '';
+    dirty = true;
+    pos.x = homeX(side);
+    root.style.transform = `translate(${Math.round(pos.x) - CX * S}px, ${Math.round(footY()) - FY * S}px)`;
+    if (!cur) {
+      queue = [];
+      lastAct = 'enter';
+      next();
+      run();
+      return;
+    }
+    queue = [];
+    lastAct = 'enter';
+    cur.total = cur.t;
+    run();
+  }
 
   // console easter egg: miniAli.do('pushups' | 'music' | 'coding' | 'peek' | 'swap'), miniAli.wave()
+  // lane(element) walks him along that strip (the AliOS taskbar) until lane(null)
   window.miniAli = {
     do(name) { const f = name === 'peekSwap' ? () => ACTIVITIES.peek(true) : ACTIVITIES[name]; if (!f || !cur) return Object.keys(ACTIVITIES); queue = f(); lastAct = name; cur.total = cur.t; return name; },
     wave,
     say,
+    lane: setLane,
   };
   // walk in from the edge a moment after the page loads
   queue = reduce ? [] : [{ frames: WALK, fd: 120, move: () => homeX(side), face: 'in' }];
-  setTimeout(() => { if (reduce) pos.x = homeX(side); next(); run(); }, 1400);
+  setTimeout(() => { if (cur) return; if (reduce) pos.x = homeX(side); next(); run(); }, 1400);
 })();
