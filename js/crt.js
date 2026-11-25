@@ -60,66 +60,9 @@
     dispatchEvent(new CustomEvent("crt:change", { detail: level(theme) }));
   }
 
-  /* One small canvas, stretched by CSS. Still when the visitor asked for
-     less motion, and paused while the tab is hidden. */
-  function grain(canvas, running) {
-    if (!canvas) return () => {};
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return () => {};
-    const ctx = canvas.getContext("2d", { alpha: true });
-    if (!ctx) return () => {};
-    let timer = 0;
-    let dead = false;
-    const paint = () => {
-      const w = 320;
-      const h = 180;
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-      }
-      const img = ctx.createImageData(w, h);
-      const data = img.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const roll = Math.random();
-        let n = 0;
-        let a = 0;
-        if (roll > 0.93) {
-          n = 235;
-          a = 150;
-        } else if (roll < 0.035) {
-          n = 0;
-          a = 110;
-        }
-        data[i] = n;
-        data[i + 1] = n;
-        data[i + 2] = n;
-        data[i + 3] = a;
-      }
-      ctx.putImageData(img, 0, 0);
-    };
-    const step = () => {
-      if (dead) return;
-      if (document.hidden || !running()) {
-        clearTimeout(timer);
-        timer = 0;
-        return;
-      }
-      paint();
-      const slow = matchMedia("(max-width: 800px)").matches;
-      timer = setTimeout(step, slow ? 260 : 140);
-    };
-    const onVis = () => {
-      if (dead) return;
-      clearTimeout(timer);
-      timer = 0;
-      if (!document.hidden) step();
-    };
-    document.addEventListener("visibilitychange", onVis);
-    step();
-    return () => {
-      dead = true;
-      clearTimeout(timer);
-      document.removeEventListener("visibilitychange", onVis);
-    };
+  /* Full CRT is the scanlines and the refresh band. No grain canvas. */
+  function grain() {
+    return () => {};
   }
 
   function ensure() {

@@ -3524,13 +3524,13 @@
         const crtHint = {
             off: "No CRT effect",
             soft: "Still scanlines and a light vignette",
-            full: "Rolling scanlines, grain, glow and vignette",
+            full: "Rolling scanlines, a refresh band, glow and vignette",
         };
         m.innerHTML =
             Object.entries(THEMES)
                 .map(
                     ([k, t]) =>
-                        `<button type="button" role="menuitemradio" aria-checked="${k === p}" data-theme-set="${k}"><span class="sw" data-swatch="${k}" aria-hidden="true"></span>${t.label}${!editing && k === C.theme ? ' <small style="color:var(--dim)">default</small>' : ""}</button>`,
+                        `<button type="button" role="menuitemradio" aria-checked="${k === p}" data-theme-set="${k}"><span class="sw" aria-hidden="true">${t.sw.map((c) => `<i style="background:${c}"></i>`).join("")}</span>${t.label}${!editing && k === C.theme ? ' <small style="color:var(--dim)">default</small>' : ""}</button>`,
                 )
                 .join("") +
             `<div class="crt-ctrl" role="radiogroup" aria-label="CRT intensity"><span class="crt-kicker">CRT</span>${["off", "soft", "full"]
@@ -5104,6 +5104,7 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
             themes: Object.entries(THEMES).map(([id, t]) => ({
                 id,
                 label: t.label,
+                sw: t.sw,
             })),
         });
     });

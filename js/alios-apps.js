@@ -478,7 +478,9 @@
         '<div class="os-radios" role="radiogroup" aria-label="Colour theme">' +
         themes.map((t) =>
           '<button type="button" role="radio" data-theme="' + esc(t.id) + '" aria-checked="' + (t.id === cur) + '">' +
-          '<span class="os-swatch" data-swatch="' + esc(t.id) + '" aria-hidden="true"></span>' + esc(t.label) + "</button>",
+          '<span class="os-swatch" aria-hidden="true">' +
+          (t.sw || []).map((c) => '<i style="background:' + esc(c) + '"></i>').join("") +
+          "</span>" + esc(t.label) + "</button>",
         ).join("") +
         "</div>" +
         '<p class="os-kicker">CRT</p>' +
@@ -494,7 +496,7 @@
         "</div>" +
         '<p class="os-note">' + (motion
           ? "Reduced motion is on, so the CRT stays still. The theme menu uses this same setting."
-          : "Full rolls the scanlines, with a faint refresh band and live grain. Soft keeps the scanlines still. Opening AliOS uses Full until you pick a level or log out. The theme menu uses this same setting.") + "</p>" +
+          : "Full rolls the scanlines, with a faint refresh band. Soft keeps the scanlines still. Opening AliOS uses Full until you pick a level or log out. The theme menu uses this same setting.") + "</p>" +
         '<p class="os-note">With a window title focused, the arrow keys move it. Shift and the arrow keys resize it. Escape closes it.</p>' +
         "</div>";
       const group = body.querySelector(".os-radios");
