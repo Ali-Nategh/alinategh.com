@@ -3,7 +3,7 @@
 (() => {
   "use strict";
   const A = () => window.Achievements;
-  const THEMES = ["navy", "burgundy", "terminal", "light", "glass"];
+  const THEMES = ["navy", "burgundy", "terminal", "light", "glass", "crt"];
   const KEY = "an.ach.themes";
   const read = () => {
     try { return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }

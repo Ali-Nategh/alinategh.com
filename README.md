@@ -24,8 +24,8 @@ Plain HTML, CSS and JavaScript. No framework, no build step, no dependencies.
 | **Music, first** | A playable piano right on the page (mouse, touch, or the `A`–`'` keys on your keyboard), my instruments and years, and links to my music. |
 | **Experience, skills, projects, education, certifications** | All driven by one content file, so I can reorder, hide or rewrite any section without touching code. |
 | **The studio** (`#studio`) | A small sheet-music editor: write notes and chords on a staff, choose one of five synth voices, play it back and save it. |
-| **The terminal** (`` ` `` key) | A fake zsh with real commands (`whoami`, `projects`, `goto music`, `theme light`, `sudo reboot`…) plus my own custom commands. |
-| **Themes** | Navy & brass (default), Burgundy, Terminal, Light and Liquid glass. Visitors pick one from the top bar and their browser remembers it. |
+| **The terminal** (`` ` `` key) | A fake zsh with real commands (`whoami`, `projects`, `goto music`, `theme light`, `sudo reboot`…). On a large screen, `startx` boots AliOS. |
+| **Themes** | Navy & brass (default), Burgundy, Terminal, Light, Liquid glass and CRT. Visitors pick one from the top bar and their browser remembers it. |
 | **Mini Ali** | A pixel-art me who lives at the edge of the page and gets up to things. Click him and he waves. |
 | **Binary notes** | Faint musical notes in the background that assemble out of `0`s and `1`s, hold for a moment, then dissolve. |
 | **In-page editor** (`#admin`) | Click any text on the page to edit it, then use the side panel for everything else. Export the result as `content.json`. |
@@ -137,7 +137,7 @@ A sheet is a list of events. Each event is `{ k: [{ s, a }], d, dot }`, where `s
 
 Press `` ` `` or click **~/tty**. It has command history (↑ ↓) and accepts both built-in and custom commands:
 
-- **Built-in:** `help`, `whoami`, `projects`, `experience`, `education`, `certs`, `stack`, `music`, `play [sheet]`, `studio`, `contact`, `copy-email`, `theme <name>`, `goto <section>`, `ls`, `cat`, `date`, `echo`, `run mergify`, `clear`, `exit`, `sudo …`
+- **Built-in:** `help`, `whoami`, `projects`, `experience`, `education`, `certs`, `stack`, `music`, `play [sheet]`, `studio`, `contact`, `copy-email`, `theme <name>`, `goto <section>`, `ls`, `cat`, `date`, `echo`, `run mergify`, `startx`, `logout`, `shutdown`, `clear`, `exit`, `sudo …`
 - **Custom:** commands defined in `content.json` (editable from the editor's Terminal tab). Each one prints text and can optionally trigger an action: play a sheet, open a section, switch theme or open a link. The defaults are `coffee`, `fun-fact` and `signature`.
 
 </details>
@@ -190,6 +190,7 @@ His hair, skin, jacket, glasses and beard can be changed from the editor (`C.min
 │   ├── mini.css          mini Ali's canvas
 │   ├── eggs.css          trophies, developer mode, echo
 │   ├── mergify.css       order-merge teaser and pipeline
+│   ├── alios.css         AliOS desktop, loaded only after boot
 │   └── notfound.css      the lost page
 ├── js/
 │   ├── app.js            content model, render, editor, themes, sphere, synths, studio, terminal
@@ -198,9 +199,11 @@ His hair, skin, jacket, glasses and beard can be changed from the editor (`C.min
 │   ├── achievements.js   trophy bus, toast, jingle, `trophies` data
 │   ├── eggs.js           unlocks for themes, the name in notes, and watching Mini Ali
 │   ├── konami.js         developer mode
-│   ├── echo.js           Simon on the home piano
+│   ├── echo.js           Simon on five keys, C to G
 │   ├── mergify.js        order-merge pipeline (loaded on play)
 │   ├── mergify-card.js   play button, teaser, `run mergify`
+│   ├── alios.js          AliOS desktop and window manager (loaded on boot)
+│   ├── alios-apps.js     AliOS windows, drawn from content.json
 │   ├── console-hello.js  the devtools greeting and `hire()`
 │   └── notfound.js       the playable 404
 ├── assets/
@@ -294,6 +297,8 @@ Achievements.unlock("my-egg");
 
 A small toast and a short chime mark the unlock, and a count sits in the corner after the first one. `trophies` in the terminal lists them. Locked rows are a hint, not the name. Motion is dropped when the visitor has asked for less of it.
 
+- `startx` or **boot AliOS** opens a desktop. Under 900px wide or 640px tall it opens a phone home screen instead, with the same apps full screen. `logout`, `exit` or **log out** returns to the page. `shutdown` and `reboot` play the boot chime. The Mergify demo plays in the Mergify window. Settings can turn the CRT look down
+- `play echo` or the **echo** button is Simon on five keys, C D E F G. It works on the page and inside AliOS
 - `sudo reboot` in the terminal plays a boot chime written for the site
 - `sudo hire ali`
 - `signature` plays the notes hidden in my name: **A · E · G · H** (H is B in German notation). Playing those four notes yourself on the piano is its own trophy
@@ -301,7 +306,7 @@ A small toast and a short chime mark the unlock, and a count sits in the corner 
 - Click mini Ali, or wait and watch what he gets up to
 - Open the console. `hire()` leaves my email. `miniAli.wave()` and `miniAli.do('music')` (also `'pushups'` and `'coding'`) poke the pixel
 - The Konami code (↑ ↑ ↓ ↓ ← → ← → B A) turns on developer mode
-- `play echo` or `echo-game`, or the **echo** button by the piano: Simon, and the melody starts with A · E · G · H
+- `play echo` or `echo-game`, or the **echo** button by the piano: Simon on C D E F G. Keys `A S D F G` or `1`–`5`. The same game opens inside AliOS
 - **Play the pipeline** on the BarAI card, or `run mergify`: five orders, two from the same address, one label saved. Staying to the end is a trophy
 - A missing URL is a small playable room. **Play the lost notes** and he finds his way back
 

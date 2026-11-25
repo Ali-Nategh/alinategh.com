@@ -1061,7 +1061,7 @@
       <div class="piano-box">
         <div class="piano-head"><span>~/piano · C4–G5</span><span class="note-read" id="noteRead" aria-live="polite">—</span></div>
         <div class="piano" id="homePiano" aria-label="Playable piano keyboard"></div>
-        <div class="piano-actions"><button class="btn claret" type="button" id="riff">${T("music.phraseLabel")}</button><button class="btn" type="button" id="echoLaunch" title="Simon-style game on this piano">echo</button><span class="name-notes" id="nameNotes" aria-hidden="true">${nameNotesHTML()}</span></div>
+        <div class="piano-actions"><button class="btn claret" type="button" id="riff">${T("music.phraseLabel")}</button><button class="btn" type="button" id="echoLaunch" title="Simon on five keys, C to G">echo</button><span class="name-notes" id="nameNotes" aria-hidden="true">${nameNotesHTML()}</span></div>
         ${T("music.phraseHint", "p", "hint")}
         <p class="hint">Click, tap or drag across the keys. On a keyboard, use <kbd>A</kbd>–<kbd>'</kbd> for white keys and <kbd>W</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>Y</kbd> <kbd>U</kbd> <kbd>O</kbd> <kbd>P</kbd> for black keys.</p>
       </div>
@@ -1104,6 +1104,7 @@
       <button class="tty-btn theme-btn" type="button" data-theme-menu aria-haspopup="menu" aria-expanded="false" aria-label="Change colour theme"><svg class="tdot" viewBox="0 0 16 16" aria-hidden="true"><circle class="t-bg" cx="8" cy="8" r="6.6"/><path class="t-fill" d="M8 1.4a6.6 6.6 0 0 1 0 13.2z"/><circle class="t-ring" cx="8" cy="8" r="6.6"/></svg><span class="tlbl">theme</span></button>
       <a class="tty-btn" href="#studio">${T("nav.topStudio")}</a>
       <button class="tty-btn" type="button" data-open-tty>${T("nav.topTty")} <kbd aria-hidden="true">\`</kbd></button>
+      <button class="tty-btn alios-boot" type="button" data-startx aria-label="Boot AliOS">boot AliOS</button>
     </div>`;
         const vis = C.order.filter((o) => o.on).map((o) => o.id);
         const navIds = vis.filter((id) => id !== "contact"),
@@ -1320,8 +1321,11 @@
         tgtX = tgtY = 0;
     });
     let rafOn = false;
+    function deskOn() {
+        return document.body.classList.contains("alios");
+    }
     function kick() {
-        if (!rafOn && sphereVisible && !document.hidden && !$("#home").hidden) {
+        if (!rafOn && sphereVisible && !document.hidden && !$("#home").hidden && !deskOn()) {
             rafOn = true;
             last = performance.now();
             requestAnimationFrame(frame);
@@ -1356,7 +1360,7 @@
         return Math.max(R * 0.45, Math.min(R, roomX / peakX, roomY / peakY));
     }
     function frame(now) {
-        if (!sphereVisible || document.hidden || $("#home").hidden) {
+        if (!sphereVisible || document.hidden || $("#home").hidden || deskOn()) {
             rafOn = false;
             return;
         }
@@ -2338,40 +2342,98 @@
             (g.left ? SHIFT : 0)
         );
     }
-    /* The treble clef glyph differs between fonts, so measure it once and fit it to standard engraving:
-   the box runs from ~1.4 spaces above the top line to ~1.6 below the bottom line, which puts the curl on the G line. */
+    /* Fit the glyph, then put its spiral on the G line (second line from the
+       bottom). Measuring inside the scaled sheet made a bad box huge. */
     let clefFit = null;
     function measureClef() {
-        try {
-            const t = document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "text",
-            );
-            t.setAttribute("class", "clef");
-            t.setAttribute("x", 0);
-            t.setAttribute("y", 100);
-            t.setAttribute("font-size", 50);
-            t.textContent = "𝄞";
-            svgEl.appendChild(t);
-            const bb = t.getBBox();
-            t.remove();
-            if (bb.height > 5) {
-                const size = (50 * 7.02 * GAP) / bb.height;
-                clefFit = {
-                    size,
-                    off: ((bb.y - 100) * size) / 50,
-                    dx: (-bb.x * size) / 50,
-                };
-            }
-        } catch {
-            clefFit = null;
+        const fontPx = 120;
+        const W = 260, H = 260;
+        const baseX = 40, baseY = 170;
+        const canvas = document.createElement("canvas");
+        canvas.width = W;
+        canvas.height = H;
+        const g = canvas.getContext("2d", { willReadFrequently: true });
+        const family = (
+            getComputedStyle(document.documentElement).getPropertyValue("--music") ||
+            '"Noto Music", serif'
+        ).trim();
+        g.font = fontPx + "px " + family;
+        g.fillStyle = "#000";
+        g.textBaseline = "alphabetic";
+        g.fillText("𝄞", baseX, baseY);
+        const data = g.getImageData(0, 0, W, H).data;
+        const inkAt = (x, y) => data[(y * W + x) * 4 + 3] > 40;
+        let minX = W, minY = H, maxX = 0, maxY = 0, count = 0;
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (inkAt(x, y)) {
+            count++;
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
         }
+        const height = maxY - minY;
+        const fallback = () => {
+            clefFit = { size: GAP * 4.03, curlOff: -GAP * 0.15, leftOff: 0 };
+        };
+        if (count < 30 || height < 12) { fallback(); return; }
+        const seen = new Uint8Array(W * H);
+        const stack = [];
+        const push = (x, y) => {
+            if (x < minX || y < minY || x > maxX || y > maxY) return;
+            const i = y * W + x;
+            if (seen[i] || inkAt(x, y)) return;
+            seen[i] = 1;
+            stack.push(i);
+        };
+        for (let x = minX; x <= maxX; x++) { push(x, minY); push(x, maxY); }
+        for (let y = minY; y <= maxY; y++) { push(minX, y); push(maxX, y); }
+        while (stack.length) {
+            const i = stack.pop();
+            const x = i % W, y = (i / W) | 0;
+            push(x + 1, y); push(x - 1, y); push(x, y + 1); push(x, y - 1);
+        }
+        let best = null;
+        const mark = new Uint8Array(W * H);
+        for (let y = minY; y <= maxY; y++) for (let x = minX; x <= maxX; x++) {
+            const i = y * W + x;
+            if (mark[i] || seen[i] || inkAt(x, y)) continue;
+            let area = 0, sx = 0, sy = 0;
+            const q = [i];
+            mark[i] = 1;
+            while (q.length) {
+                const j = q.pop();
+                const px = j % W, py = (j / W) | 0;
+                area++; sx += px; sy += py;
+                for (const n of [j + 1, j - 1, j + W, j - W]) {
+                    const nx = n % W, ny = (n / W) | 0;
+                    if (nx < minX || nx > maxX || ny < minY || ny > maxY) continue;
+                    if (mark[n] || seen[n] || inkAt(nx, ny)) continue;
+                    mark[n] = 1;
+                    q.push(n);
+                }
+            }
+            const cy = sy / area;
+            const frac = (cy - minY) / height;
+            if (frac < 0.4 || area < 8) continue;
+            if (!best || area > best.area) best = { area, cy };
+        }
+        const curlY = best ? best.cy : minY + height * 0.62;
+        const raw = (fontPx * 7.02 * GAP) / height;
+        const size = Math.max(GAP * 2.8, Math.min(GAP * 5.2, raw));
+        clefFit = {
+            size,
+            curlOff: (curlY - baseY) * size / fontPx,
+            leftOff: (minX - baseX) * size / fontPx,
+        };
     }
     function clefSVG(top) {
         if (!clefFit) measureClef();
         if (!clefFit)
-            return `<text class="clef" x="12" y="${top + 4 * GAP + 1}" font-size="50">𝄞</text>`;
-        return `<text class="clef" x="${(10 + clefFit.dx).toFixed(1)}" y="${(top - 1.39 * GAP - clefFit.off).toFixed(1)}" font-size="${clefFit.size.toFixed(1)}">𝄞</text>`;
+            return `<text class="clef" x="12" y="${top + 3 * GAP}" font-size="${(GAP * 4).toFixed(1)}">𝄞</text>`;
+        /* G line is the second staff line from the bottom. */
+        const y = top + 3 * GAP - clefFit.curlOff;
+        const x = 8 - clefFit.leftOff;
+        return `<text class="clef" x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="${clefFit.size.toFixed(1)}">𝄞</text>`;
     }
     if (document.fonts && document.fonts.ready)
         document.fonts.ready.then(() => {
@@ -3447,6 +3509,7 @@
             applyPalette.last = p;
             dispatchEvent(new CustomEvent("theme:used", {detail: p}));
         }
+        syncCrt();
     }
     function renderThemeMenu() {
         const m = $("#themeMenu");
@@ -3567,7 +3630,60 @@
             label: "Liquid glass",
             sw: ["#ff7ab8", "#6f7bff", "#1fc8c0", "#ffffff"],
         },
+        crt: {
+            label: "CRT",
+            sw: ["#04140c", "#0d241b", "#62ffb4", "#d6ff73"],
+        },
     };
+    /* A quiet grain over the CRT theme. One small canvas, paused when the
+       tab is hidden, AliOS is up, or the visitor asked for less motion. */
+    let crtTimer = 0;
+    function syncCrt() {
+        let veil = document.getElementById("crtVeil");
+        let grain = document.getElementById("crtGrain");
+        if (!veil) {
+            veil = document.createElement("div");
+            veil.id = "crtVeil";
+            veil.setAttribute("aria-hidden", "true");
+            document.body.appendChild(veil);
+        }
+        if (!grain) {
+            grain = document.createElement("canvas");
+            grain.id = "crtGrain";
+            grain.setAttribute("aria-hidden", "true");
+            document.body.appendChild(grain);
+        }
+        const on = document.documentElement.dataset.palette === "crt"
+            && !document.body.classList.contains("alios");
+        const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        clearInterval(crtTimer);
+        crtTimer = 0;
+        if (!on) return;
+        const ctx = grain.getContext("2d", { alpha: true });
+        const paint = () => {
+            const w = 96, h = 64;
+            if (grain.width !== w) { grain.width = w; grain.height = h; }
+            const img = ctx.createImageData(w, h);
+            const data = img.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const n = 140 + Math.random() * 115;
+                data[i] = n; data[i + 1] = n; data[i + 2] = n; data[i + 3] = 36;
+            }
+            ctx.putImageData(img, 0, 0);
+        };
+        paint();
+        if (reduceMotion || document.hidden) return;
+        crtTimer = setInterval(() => {
+            if (document.hidden || document.body.classList.contains("alios")
+                || document.documentElement.dataset.palette !== "crt") {
+                clearInterval(crtTimer);
+                crtTimer = 0;
+                return;
+            }
+            paint();
+        }, 140);
+    }
+    document.addEventListener("visibilitychange", () => syncCrt());
     function openPanel(tab, item) {
         if (item) panelItem = item;
         panelTab = tab;
@@ -4074,16 +4190,78 @@
         ["copy-email", "copy my email address"],
         [
             "theme",
-            "[navy|burgundy|terminal|light|glass] recolour the site for you",
+            "[navy|burgundy|terminal|light|glass|crt] recolour the site for you",
         ],
         ["goto", "[section] scroll to a section"],
         ["sudo", "reboot · hire " + C.site.first.toLowerCase()],
         ["trophies", "what you've found on this site"],
         ["echo-game", "Simon on the piano, starting with my name"],
         ["run", "run mergify — watch five orders become one shipment"],
+        ["startx", "boot AliOS on a large screen"],
+        ["logout", "leave AliOS"],
+        ["shutdown", "power AliOS off"],
+        ["reboot", "restart AliOS, or sudo reboot"],
         ["clear", "clear the screen"],
-        ["exit", "close the terminal (or press esc)"],
+        ["exit", "close the terminal, or leave AliOS"],
     ];
+    /* AliOS loads on boot. A narrow or short window gets the phone shell. */
+    let aliosLoad = null;
+    function loadAliOS() {
+        if (window.AliOS) return Promise.resolve(window.AliOS);
+        if (aliosLoad) return aliosLoad;
+        aliosLoad = new Promise((resolve, reject) => {
+            const css = document.createElement("link");
+            css.rel = "stylesheet";
+            css.href = "css/alios.css";
+            css.onload = () => {
+                const apps = document.createElement("script");
+                apps.src = "js/alios-apps.js";
+                apps.onload = () => {
+                    const s = document.createElement("script");
+                    s.src = "js/alios.js";
+                    s.onload = () =>
+                        window.AliOS
+                            ? resolve(window.AliOS)
+                            : reject(new Error("start"));
+                    s.onerror = () => reject(new Error("load"));
+                    document.head.appendChild(s);
+                };
+                apps.onerror = () => reject(new Error("load"));
+                document.head.appendChild(apps);
+            };
+            css.onerror = () => reject(new Error("load"));
+            document.head.appendChild(css);
+        }).catch((err) => {
+            aliosLoad = null;
+            throw err;
+        });
+        return aliosLoad;
+    }
+    function bootAliOS(fromTty) {
+        const say = (html) => {
+            if (!fromTty) openTTY();
+            print(html);
+        };
+        if (document.body.classList.contains("alios")) {
+            if (fromTty) print("AliOS is already running.");
+            return;
+        }
+        if (editing) {
+            say("<span class=\"a\">Close the editor before booting AliOS.</span>");
+            return;
+        }
+        if (fromTty) {
+            print('<span class="d">starting AliOS…</span>');
+            closeTTY();
+        }
+        loadAliOS()
+            .then((os) => os.boot())
+            .catch(() => {
+                say(
+                    '<span class="e">AliOS did not load.</span> Refresh and try <span class="b">startx</span> again.',
+                );
+            });
+    }
     function reboot() {
         print(
             `<span class="a">Broadcast message from ${me()}@dev:</span>\nThe system is going down for reboot NOW!`,
@@ -4299,13 +4477,45 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
                         '<span class="d">Resume on request. Email me and I\'ll send it.</span>',
                     )
                   : print(`cat: ${E(a || "")}: no such file`),
-        reboot: () =>
+        reboot: () => {
+            if (document.body.classList.contains("alios")) {
+                print(
+                    '<span class="a">AliOS is going down for reboot NOW!</span>',
+                );
+                dispatchEvent(new Event("alios:reboot"));
+                return;
+            }
             print(
                 'reboot: must be superuser. Try <span class="b">sudo reboot</span>.',
-            ),
+            );
+        },
+        shutdown: () => {
+            if (document.body.classList.contains("alios")) {
+                print('<span class="a">Shutting down AliOS…</span>');
+                dispatchEvent(new Event("alios:shutdown"));
+                return;
+            }
+            print(
+                'shutdown: try <span class="b">sudo shutdown</span>, or boot AliOS with <span class="b">startx</span>.',
+            );
+        },
         sudo: (a) => {
-            if (a.startsWith("reboot")) return reboot();
+            if (a.startsWith("reboot")) {
+                if (document.body.classList.contains("alios")) {
+                    print(
+                        '<span class="a">AliOS is going down for reboot NOW!</span>',
+                    );
+                    dispatchEvent(new Event("alios:reboot"));
+                    return;
+                }
+                return reboot();
+            }
             if (a.startsWith("shutdown")) {
+                if (document.body.classList.contains("alios")) {
+                    print('<span class="a">Shutting down AliOS…</span>');
+                    dispatchEvent(new Event("alios:shutdown"));
+                    return;
+                }
                 playSeq(SHUTDOWN);
                 return print(
                     '<span class="a">Shutting down…</span> just kidding. Try <span class="b">sudo reboot</span>.',
@@ -4349,7 +4559,23 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
             document.dispatchEvent(new Event("mergify:play"));
         },
         clear: () => (out.innerHTML = ""),
-        exit: () => closeTTY(),
+        startx: () => bootAliOS(true),
+        logout: () => {
+            if (document.body.classList.contains("alios")) {
+                dispatchEvent(new Event("alios:logout"));
+                return;
+            }
+            print(
+                'logout: not in AliOS. Type <span class="b">startx</span>.',
+            );
+        },
+        exit: () => {
+            if (document.body.classList.contains("alios")) {
+                dispatchEvent(new Event("alios:logout"));
+                return;
+            }
+            closeTTY();
+        },
         date: () => print(new Date().toString()),
         echo: (a, raw) => print(E(raw)),
     };
@@ -4386,6 +4612,10 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
             );
     }
     function startEchoGame() {
+        if (document.body.classList.contains("alios")) {
+            dispatchEvent(new CustomEvent("alios:echo"));
+            return;
+        }
         closeTTY();
         if (location.hash === "#studio") location.hash = "music";
         else {
@@ -4399,6 +4629,10 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
         setTimeout(() => window.EchoGame && EchoGame.start(), 320);
     }
     function openTTY() {
+        if (document.body.classList.contains("alios")) {
+            dispatchEvent(new CustomEvent("alios:open", {detail: "terminal"}));
+            return;
+        }
         lastFocus = document.activeElement;
         tty.hidden = false;
         $("#ttyPrompt").innerHTML =
@@ -4413,10 +4647,20 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
         setTimeout(() => inp.focus(), 30);
     }
     function closeTTY() {
+        const embedded = tty.dataset.alios === "1";
         tty.hidden = true;
+        if (embedded) {
+            dispatchEvent(new Event("alios:tty-closed"));
+            return;
+        }
         if (lastFocus && lastFocus.focus) lastFocus.focus();
     }
     document.addEventListener("click", (e) => {
+        if (e.target.closest("[data-startx]")) {
+            e.preventDefault();
+            bootAliOS(false);
+            return;
+        }
         if (editing && e.target.closest("#home, #studioTop, #studioHero"))
             return;
         if (e.target.closest("[data-open-tty]")) openTTY();
@@ -4452,7 +4696,10 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
         }
     });
     tty.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeTTY();
+        if (e.key === "Escape") {
+            e.stopPropagation();
+            closeTTY();
+        }
     });
     addEventListener("ach:open", () => {
         openTTY();
@@ -4462,21 +4709,26 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
     /* ---------- global keyboard ---------- */
     const held = new Set();
     addEventListener("keydown", (e) => {
-        if (!tty.hidden || e.altKey) return;
+        if (e.altKey) return;
+        const embeddedTty = tty.dataset.alios === "1";
+        if (!tty.hidden && !embeddedTty) return;
+        if (!tty.hidden && tty.contains(document.activeElement)) return;
         const t = document.activeElement,
             typing =
                 t &&
                 (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) ||
                     t.isContentEditable);
+        const inOs = document.body.classList.contains("alios");
         if (
             (e.ctrlKey || e.metaKey) &&
             e.key.toLowerCase() === "z" &&
             !typing
         ) {
-            if (!$("#studio").hidden) {
+            const studioEl = $("#studio");
+            if (studioEl && !studioEl.hidden && (!inOs || studioEl.contains(t))) {
                 e.preventDefault();
                 undo();
-            } else if (editing) {
+            } else if (!inOs && editing) {
                 e.preventDefault();
                 adminUndoStep();
             }
@@ -4485,7 +4737,27 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
         if (e.ctrlKey || e.metaKey || typing) return;
         if (e.key === "`") {
             e.preventDefault();
+            if (inOs) {
+                dispatchEvent(new CustomEvent("alios:open", {detail: "terminal"}));
+                return;
+            }
             openTTY();
+            return;
+        }
+        if (inOs) {
+            const studioEl = $("#studio");
+            if (studioEl && !studioEl.hidden && studioEl.contains(t)) {
+                studioKey(e);
+                return;
+            }
+            const pianoWin = document.querySelector('.os-win[data-win="piano"]');
+            if (pianoWin && !pianoWin.hidden && pianoWin.contains(t)) {
+                const note = HOME_KEYMAP[e.key.toLowerCase()];
+                if (note && !held.has(e.key) && $("#homePiano")) {
+                    held.add(e.key);
+                    playHome(note);
+                }
+            }
             return;
         }
         if (!$("#studio").hidden) {
@@ -4626,8 +4898,11 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
     function route() {
         const h = location.hash.slice(1);
         const studio = h === "studio";
-        $("#home").hidden = studio;
-        $("#studio").hidden = !studio;
+        const desk = document.body.classList.contains("alios");
+        if (!desk) {
+            $("#home").hidden = studio;
+            $("#studio").hidden = !studio;
+        }
         if (studio) {
             loadMusicFont();
             if (!studioReady) {
@@ -4635,9 +4910,9 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
                 buildPiano($("#sKeys"), STUDIO_KEYS, onStudioKey);
             }
             loadSheetIntoUI();
-            scrollTo(0, 0);
+            if (!desk) scrollTo(0, 0);
             if (editing) makeEditable();
-        } else {
+        } else if (!desk) {
             kick();
             if (h === "admin" && !editing)
                 contentReady.then(() => {
@@ -4826,6 +5101,51 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
     );
     contentReady.then(() => {
         document.documentElement.dataset.boot = "done";
+    });
+    addEventListener("alios:content", (e) => {
+        const reply = e.detail && e.detail.reply;
+        if (typeof reply !== "function") return;
+        reply({
+            content: clone(C),
+            theme: currentPalette(),
+            themes: Object.entries(THEMES).map(([id, t]) => ({
+                id,
+                label: t.label,
+            })),
+        });
+    });
+    addEventListener("alios:theme", (e) => {
+        if (typeof e.detail === "string") setVisitorTheme(e.detail);
+    });
+    addEventListener("alios:chime", (e) => {
+        if (e.detail === "shutdown") playSeq(SHUTDOWN);
+        else if (e.detail === "boot") playSeq(BOOT);
+    });
+    addEventListener("alios:riff", () => riff());
+    addEventListener("alios:studio", () => {
+        loadMusicFont();
+        if (!studioReady) {
+            studioReady = true;
+            buildPiano($("#sKeys"), STUDIO_KEYS, onStudioKey);
+        }
+        loadSheetIntoUI();
+    });
+    addEventListener("alios:focus-tty", () => {
+        $("#ttyPrompt").innerHTML =
+            `<span class="u">${me()}@dev</span>:<span class="p">~</span>$`;
+        $("#ttyTitle").textContent = `${me()}@dev — zsh`;
+        if (!booted) {
+            booted = true;
+            print(
+                `<span class="d">Last login: ${new Date().toDateString()} on ttys001</span>\n${ttyFmt(C.tty.welcome)}`,
+            );
+        }
+        setTimeout(() => inp.focus(), 40);
+    });
+    addEventListener("alios:state", () => {
+        route();
+        kick();
+        syncCrt();
     });
     route();
 })();
