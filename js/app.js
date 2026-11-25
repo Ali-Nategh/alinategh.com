@@ -2342,54 +2342,98 @@
             (g.left ? SHIFT : 0)
         );
     }
-    /* The treble clef glyph differs between fonts, so measure it once and fit it to standard engraving:
-   the box runs from ~1.4 spaces above the top line to ~1.6 below the bottom line, which puts the curl on the G line. */
+    /* Fit the glyph, then put its spiral on the G line (second line from the
+       bottom). Measuring inside the scaled sheet made a bad box huge. */
     let clefFit = null;
-    /* Measure in a private, unscaled svg. Measuring inside #sheetSvg picks up
-       its CSS width and any inherited line-height, and a tiny box then
-       inflates the clef across several staves. */
     function measureClef() {
-        const NS = "http://www.w3.org/2000/svg";
-        const probe = document.createElementNS(NS, "svg");
-        probe.setAttribute("width", "240");
-        probe.setAttribute("height", "240");
-        probe.style.cssText =
-            "position:absolute;left:0;top:0;width:240px;height:240px;visibility:hidden;pointer-events:none";
-        const t = document.createElementNS(NS, "text");
-        t.setAttribute("x", "20");
-        t.setAttribute("y", "140");
-        t.setAttribute("font-size", "50");
-        t.style.fontSize = "50px";
-        t.style.lineHeight = "1";
-        t.style.fontFamily =
+        const fontPx = 120;
+        const W = 260, H = 260;
+        const baseX = 40, baseY = 170;
+        const canvas = document.createElement("canvas");
+        canvas.width = W;
+        canvas.height = H;
+        const g = canvas.getContext("2d", { willReadFrequently: true });
+        const family = (
             getComputedStyle(document.documentElement).getPropertyValue("--music") ||
-            '"Noto Music", serif';
-        t.textContent = "𝄞";
-        probe.appendChild(t);
-        document.body.appendChild(probe);
-        try {
-            const bb = t.getBBox();
-            const target = 7.02 * GAP;
-            const size = bb.height > 8 ? (50 * target) / bb.height : 0;
-            if (size > GAP * 2.8 && size < GAP * 5.2) {
-                clefFit = {
-                    size,
-                    off: ((bb.y - 140) * size) / 50,
-                    dx: (-(bb.x - 20) * size) / 50,
-                };
-            } else {
-                clefFit = { size: GAP * 4.03, off: -GAP * 1.2, dx: 2 };
-            }
-        } catch {
-            clefFit = { size: GAP * 4.03, off: -GAP * 1.2, dx: 2 };
+            '"Noto Music", serif'
+        ).trim();
+        g.font = fontPx + "px " + family;
+        g.fillStyle = "#000";
+        g.textBaseline = "alphabetic";
+        g.fillText("𝄞", baseX, baseY);
+        const data = g.getImageData(0, 0, W, H).data;
+        const inkAt = (x, y) => data[(y * W + x) * 4 + 3] > 40;
+        let minX = W, minY = H, maxX = 0, maxY = 0, count = 0;
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (inkAt(x, y)) {
+            count++;
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
         }
-        probe.remove();
+        const height = maxY - minY;
+        const fallback = () => {
+            clefFit = { size: GAP * 4.03, curlOff: -GAP * 0.15, leftOff: 0 };
+        };
+        if (count < 30 || height < 12) { fallback(); return; }
+        const seen = new Uint8Array(W * H);
+        const stack = [];
+        const push = (x, y) => {
+            if (x < minX || y < minY || x > maxX || y > maxY) return;
+            const i = y * W + x;
+            if (seen[i] || inkAt(x, y)) return;
+            seen[i] = 1;
+            stack.push(i);
+        };
+        for (let x = minX; x <= maxX; x++) { push(x, minY); push(x, maxY); }
+        for (let y = minY; y <= maxY; y++) { push(minX, y); push(maxX, y); }
+        while (stack.length) {
+            const i = stack.pop();
+            const x = i % W, y = (i / W) | 0;
+            push(x + 1, y); push(x - 1, y); push(x, y + 1); push(x, y - 1);
+        }
+        let best = null;
+        const mark = new Uint8Array(W * H);
+        for (let y = minY; y <= maxY; y++) for (let x = minX; x <= maxX; x++) {
+            const i = y * W + x;
+            if (mark[i] || seen[i] || inkAt(x, y)) continue;
+            let area = 0, sx = 0, sy = 0;
+            const q = [i];
+            mark[i] = 1;
+            while (q.length) {
+                const j = q.pop();
+                const px = j % W, py = (j / W) | 0;
+                area++; sx += px; sy += py;
+                for (const n of [j + 1, j - 1, j + W, j - W]) {
+                    const nx = n % W, ny = (n / W) | 0;
+                    if (nx < minX || nx > maxX || ny < minY || ny > maxY) continue;
+                    if (mark[n] || seen[n] || inkAt(nx, ny)) continue;
+                    mark[n] = 1;
+                    q.push(n);
+                }
+            }
+            const cy = sy / area;
+            const frac = (cy - minY) / height;
+            if (frac < 0.4 || area < 8) continue;
+            if (!best || area > best.area) best = { area, cy };
+        }
+        const curlY = best ? best.cy : minY + height * 0.62;
+        const raw = (fontPx * 7.02 * GAP) / height;
+        const size = Math.max(GAP * 2.8, Math.min(GAP * 5.2, raw));
+        clefFit = {
+            size,
+            curlOff: (curlY - baseY) * size / fontPx,
+            leftOff: (minX - baseX) * size / fontPx,
+        };
     }
     function clefSVG(top) {
         if (!clefFit) measureClef();
         if (!clefFit)
-            return `<text class="clef" x="12" y="${top + 4 * GAP + 1}" font-size="50">𝄞</text>`;
-        return `<text class="clef" x="${(10 + clefFit.dx).toFixed(1)}" y="${(top - 1.39 * GAP - clefFit.off).toFixed(1)}" font-size="${clefFit.size.toFixed(1)}">𝄞</text>`;
+            return `<text class="clef" x="12" y="${top + 3 * GAP}" font-size="${(GAP * 4).toFixed(1)}">𝄞</text>`;
+        /* G line is the second staff line from the bottom. */
+        const y = top + 3 * GAP - clefFit.curlOff;
+        const x = 8 - clefFit.leftOff;
+        return `<text class="clef" x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="${clefFit.size.toFixed(1)}">𝄞</text>`;
     }
     if (document.fonts && document.fonts.ready)
         document.fonts.ready.then(() => {
@@ -2433,7 +2477,6 @@
         const Ht = Math.max(1, systems.length) * SYS_H + 10;
         svg.setAttribute("viewBox", `0 0 ${Wd} ${Ht}`);
         svg.setAttribute("height", Ht);
-        if (clefFit) svg.style.setProperty("--clef-px", clefFit.size.toFixed(1) + "px");
         let out = "";
         systems.forEach((sy, si) => {
             const top = si * SYS_H + STAFF_OFF;
@@ -3466,6 +3509,7 @@
             applyPalette.last = p;
             dispatchEvent(new CustomEvent("theme:used", {detail: p}));
         }
+        syncCrt();
     }
     function renderThemeMenu() {
         const m = $("#themeMenu");
@@ -3586,7 +3630,60 @@
             label: "Liquid glass",
             sw: ["#ff7ab8", "#6f7bff", "#1fc8c0", "#ffffff"],
         },
+        crt: {
+            label: "CRT",
+            sw: ["#04140c", "#0d241b", "#62ffb4", "#d6ff73"],
+        },
     };
+    /* A quiet grain over the CRT theme. One small canvas, paused when the
+       tab is hidden, AliOS is up, or the visitor asked for less motion. */
+    let crtTimer = 0;
+    function syncCrt() {
+        let veil = document.getElementById("crtVeil");
+        let grain = document.getElementById("crtGrain");
+        if (!veil) {
+            veil = document.createElement("div");
+            veil.id = "crtVeil";
+            veil.setAttribute("aria-hidden", "true");
+            document.body.appendChild(veil);
+        }
+        if (!grain) {
+            grain = document.createElement("canvas");
+            grain.id = "crtGrain";
+            grain.setAttribute("aria-hidden", "true");
+            document.body.appendChild(grain);
+        }
+        const on = document.documentElement.dataset.palette === "crt"
+            && !document.body.classList.contains("alios");
+        const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        clearInterval(crtTimer);
+        crtTimer = 0;
+        if (!on) return;
+        const ctx = grain.getContext("2d", { alpha: true });
+        const paint = () => {
+            const w = 96, h = 64;
+            if (grain.width !== w) { grain.width = w; grain.height = h; }
+            const img = ctx.createImageData(w, h);
+            const data = img.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const n = 140 + Math.random() * 115;
+                data[i] = n; data[i + 1] = n; data[i + 2] = n; data[i + 3] = 36;
+            }
+            ctx.putImageData(img, 0, 0);
+        };
+        paint();
+        if (reduceMotion || document.hidden) return;
+        crtTimer = setInterval(() => {
+            if (document.hidden || document.body.classList.contains("alios")
+                || document.documentElement.dataset.palette !== "crt") {
+                clearInterval(crtTimer);
+                crtTimer = 0;
+                return;
+            }
+            paint();
+        }, 140);
+    }
+    document.addEventListener("visibilitychange", () => syncCrt());
     function openPanel(tab, item) {
         if (item) panelItem = item;
         panelTab = tab;
@@ -4093,7 +4190,7 @@
         ["copy-email", "copy my email address"],
         [
             "theme",
-            "[navy|burgundy|terminal|light|glass] recolour the site for you",
+            "[navy|burgundy|terminal|light|glass|crt] recolour the site for you",
         ],
         ["goto", "[section] scroll to a section"],
         ["sudo", "reboot · hire " + C.site.first.toLowerCase()],
@@ -5048,6 +5145,7 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
     addEventListener("alios:state", () => {
         route();
         kick();
+        syncCrt();
     });
     route();
 })();

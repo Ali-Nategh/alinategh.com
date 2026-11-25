@@ -25,7 +25,7 @@ Plain HTML, CSS and JavaScript. No framework, no build step, no dependencies.
 | **Experience, skills, projects, education, certifications** | All driven by one content file, so I can reorder, hide or rewrite any section without touching code. |
 | **The studio** (`#studio`) | A small sheet-music editor: write notes and chords on a staff, choose one of five synth voices, play it back and save it. |
 | **The terminal** (`` ` `` key) | A fake zsh with real commands (`whoami`, `projects`, `goto music`, `theme light`, `sudo reboot`…). On a large screen, `startx` boots AliOS. |
-| **Themes** | Navy & brass (default), Burgundy, Terminal, Light and Liquid glass. Visitors pick one from the top bar and their browser remembers it. |
+| **Themes** | Navy & brass (default), Burgundy, Terminal, Light, Liquid glass and CRT. Visitors pick one from the top bar and their browser remembers it. |
 | **Mini Ali** | A pixel-art me who lives at the edge of the page and gets up to things. Click him and he waves. |
 | **Binary notes** | Faint musical notes in the background that assemble out of `0`s and `1`s, hold for a moment, then dissolve. |
 | **In-page editor** (`#admin`) | Click any text on the page to edit it, then use the side panel for everything else. Export the result as `content.json`. |
