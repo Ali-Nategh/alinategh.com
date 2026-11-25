@@ -2345,31 +2345,45 @@
     /* The treble clef glyph differs between fonts, so measure it once and fit it to standard engraving:
    the box runs from ~1.4 spaces above the top line to ~1.6 below the bottom line, which puts the curl on the G line. */
     let clefFit = null;
+    /* Measure in a private, unscaled svg. Measuring inside #sheetSvg picks up
+       its CSS width and any inherited line-height, and a tiny box then
+       inflates the clef across several staves. */
     function measureClef() {
+        const NS = "http://www.w3.org/2000/svg";
+        const probe = document.createElementNS(NS, "svg");
+        probe.setAttribute("width", "240");
+        probe.setAttribute("height", "240");
+        probe.style.cssText =
+            "position:absolute;left:0;top:0;width:240px;height:240px;visibility:hidden;pointer-events:none";
+        const t = document.createElementNS(NS, "text");
+        t.setAttribute("x", "20");
+        t.setAttribute("y", "140");
+        t.setAttribute("font-size", "50");
+        t.style.fontSize = "50px";
+        t.style.lineHeight = "1";
+        t.style.fontFamily =
+            getComputedStyle(document.documentElement).getPropertyValue("--music") ||
+            '"Noto Music", serif';
+        t.textContent = "𝄞";
+        probe.appendChild(t);
+        document.body.appendChild(probe);
         try {
-            const t = document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "text",
-            );
-            t.setAttribute("class", "clef");
-            t.setAttribute("x", 0);
-            t.setAttribute("y", 100);
-            t.setAttribute("font-size", 50);
-            t.textContent = "𝄞";
-            svgEl.appendChild(t);
             const bb = t.getBBox();
-            t.remove();
-            if (bb.height > 5) {
-                const size = (50 * 7.02 * GAP) / bb.height;
+            const target = 7.02 * GAP;
+            const size = bb.height > 8 ? (50 * target) / bb.height : 0;
+            if (size > GAP * 2.8 && size < GAP * 5.2) {
                 clefFit = {
                     size,
-                    off: ((bb.y - 100) * size) / 50,
-                    dx: (-bb.x * size) / 50,
+                    off: ((bb.y - 140) * size) / 50,
+                    dx: (-(bb.x - 20) * size) / 50,
                 };
+            } else {
+                clefFit = { size: GAP * 4.03, off: -GAP * 1.2, dx: 2 };
             }
         } catch {
-            clefFit = null;
+            clefFit = { size: GAP * 4.03, off: -GAP * 1.2, dx: 2 };
         }
+        probe.remove();
     }
     function clefSVG(top) {
         if (!clefFit) measureClef();
@@ -2419,6 +2433,7 @@
         const Ht = Math.max(1, systems.length) * SYS_H + 10;
         svg.setAttribute("viewBox", `0 0 ${Wd} ${Ht}`);
         svg.setAttribute("height", Ht);
+        if (clefFit) svg.style.setProperty("--clef-px", clefFit.size.toFixed(1) + "px");
         let out = "";
         systems.forEach((sy, si) => {
             const top = si * SYS_H + STAFF_OFF;

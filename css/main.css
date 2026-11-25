@@ -400,7 +400,7 @@ body.rebooting main{filter:brightness(.1) saturate(.3); transition:filter .6s ea
 #sheetSvg .staff line{stroke:#2a2e45; stroke-width:1}
 #sheetSvg .bar{stroke:#2a2e45; stroke-width:1.3}
 #sheetSvg .bar.end{stroke-width:3.6}
-#sheetSvg .clef{font-family:var(--music); fill:var(--ink)}
+#sheetSvg .clef{font-family:var(--music); fill:var(--ink); font-size:var(--clef-px, 48px); line-height:1}
 #sheetSvg .ts{font:700 22px var(--display); fill:var(--ink)}
 #sheetSvg .n{cursor:pointer}
 #sheetSvg .n .ink{fill:var(--ink); stroke:var(--ink)}

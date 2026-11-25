@@ -22,7 +22,15 @@ body.alios .toast {
     radial-gradient(40% 36% at 100% 100%, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 70%),
     linear-gradient(180deg, var(--bg-2), var(--bg-1) 42%, var(--bg-0));
 }
-:root[data-palette="glass"] .os { background: transparent; }
+:root[data-palette="glass"] .os {
+  background:
+    radial-gradient(42% 38% at 12% 8%, #ff7ab8 0%, transparent 70%),
+    radial-gradient(40% 40% at 88% 14%, #6f7bff 0%, transparent 70%),
+    radial-gradient(46% 42% at 76% 78%, #1fc8c0 0%, transparent 70%),
+    radial-gradient(38% 36% at 8% 82%, #ffae57 0%, transparent 70%),
+    radial-gradient(60% 50% at 46% 46%, #7a4dff 0%, transparent 72%),
+    linear-gradient(165deg, #1c1656, #10204f 55%, #0b2a52);
+}
 
 .os-sr {
   position: absolute;
@@ -433,12 +441,33 @@ body.alios-desk #mini.mini-lane { z-index: 84; }
 
 :root[data-palette="glass"] .os-menu,
 :root[data-palette="glass"] .os-dock,
-:root[data-palette="glass"] .os-win {
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.05) 42%, rgba(255, 255, 255, 0.1)), rgba(22, 26, 74, 0.45);
-  -webkit-backdrop-filter: blur(22px) saturate(170%);
-  backdrop-filter: blur(22px) saturate(170%);
+:root[data-palette="glass"] .os-win,
+:root[data-palette="glass"] .os-phone-bar,
+:root[data-palette="glass"] .os-finder-side,
+:root[data-palette="glass"] .os .tty-win,
+:root[data-palette="glass"] .os .glass {
+  background: linear-gradient(160deg, rgba(255, 255, 255, .26), rgba(255, 255, 255, .1) 42%, rgba(255, 255, 255, .16)), rgba(12, 16, 48, .94);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
 }
-:root[data-palette="glass"] .os-titlebar { background: transparent; }
+:root[data-palette="glass"] .os-titlebar,
+:root[data-palette="glass"] .os-body,
+:root[data-palette="glass"] .os-phone-app,
+:root[data-palette="glass"] .os-phone-home {
+  background: rgba(14, 18, 52, .96);
+}
+:root[data-palette="glass"] .os-phone-appbtn {
+  background: rgba(20, 26, 68, .92);
+}
+body.alios #home,
+body.alios #bitNotes,
+body.alios #mini,
+body.alios > #studio,
+body.alios > .tty {
+  visibility: hidden;
+}
+body.alios::before,
+body.alios::after { visibility: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .os-win { animation: none; }
@@ -526,6 +555,78 @@ body.alios-mini .os { border-radius: 0; }
 .os-phone-app > #tty .term-chrome { display: none; }
 .os-phone-app > #studio { display: grid; max-width: none; margin: 0; padding: 12px 12px 28px; }
 .os-phone-app > .piano-box { padding: 8px 4px 12px; }
+
+/* Lists that sat beside the text become a drawer on the phone. */
+.os-phone-app .os-finder {
+  display: block;
+  margin: 0;
+  min-height: 100%;
+  position: relative;
+}
+.os-phone-app .os-drawer-toggle {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: grid;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  margin: 0 0 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--panel-solid);
+  cursor: pointer;
+}
+.os-phone-app .os-drawer-toggle span {
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.os-phone-app .os-finder-side {
+  position: absolute;
+  z-index: 6;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(280px, 86vw);
+  max-height: none;
+  padding: 12px 10px 20px;
+  background: var(--panel-solid);
+  border-right: 1px solid var(--line-strong);
+  box-shadow: 16px 0 40px rgba(0, 0, 0, .35);
+  transform: translateX(-105%);
+  transition: transform .2s ease;
+  overflow: auto;
+}
+.os-phone-app .os-finder.is-open .os-finder-side { transform: none; }
+.os-phone-app .os-drawer-backdrop {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, .45);
+  cursor: pointer;
+}
+.os-phone-app .os-drawer-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 0 8px auto;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font: 600 22px/1 var(--mono);
+  cursor: pointer;
+}
+.os-phone-app .os-finder-main { padding: 4px 2px 28px; overflow: visible; }
+@media (prefers-reduced-motion: reduce) {
+  .os-phone-app .os-finder-side { transition: none; }
+}
 
 /* CRT. Scanlines and the vignette are paint-only. Grain is a small canvas. */
 .os-grain,

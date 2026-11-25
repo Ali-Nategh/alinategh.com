@@ -88,27 +88,125 @@
     return '<p class="os-out"><a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(p.linkLabel || href) + "</a></p>";
   }
 
+  /* Phone apps that have a list beside the writing use a drawer, so the
+     text gets the full width. Desktop keeps the two columns. */
+  function phoneDrawer(finder, list) {
+    if (!finder || !finder.closest(".os-phone")) return;
+    finder.classList.add("os-has-drawer");
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "os-drawer-toggle";
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.setAttribute("aria-label", "Open the list");
+    toggle.innerHTML = "<span></span><span></span><span></span>";
+    const backdrop = document.createElement("button");
+    backdrop.type = "button";
+    backdrop.className = "os-drawer-backdrop";
+    backdrop.hidden = true;
+    backdrop.setAttribute("aria-label", "Close the list");
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "os-drawer-close";
+    closeBtn.setAttribute("aria-label", "Close the list");
+    closeBtn.textContent = "×";
+    list.prepend(closeBtn);
+    finder.prepend(toggle, backdrop);
+    const setOpen = (open) => {
+      finder.classList.toggle("is-open", open);
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      backdrop.hidden = !open;
+      list.inert = !open;
+    };
+    list.inert = true;
+    toggle.addEventListener("click", () => setOpen(!finder.classList.contains("is-open")));
+    backdrop.addEventListener("click", () => setOpen(false));
+    closeBtn.addEventListener("click", () => setOpen(false));
+    list.addEventListener("click", (e) => {
+      if (e.target.closest('[role="tab"], [data-proj]')) setOpen(false);
+    });
+    let startX = 0;
+    list.addEventListener("pointerdown", (e) => { startX = e.clientX; });
+    list.addEventListener("pointerup", (e) => {
+      if (startX - e.clientX > 48) setOpen(false);
+    });
+  }
+
   function mountProjects(body, ctx) {
     let dead = false;
+    let demo = null;
     empty(body, "Opening…");
     ctx.content().then((snap) => {
       if (dead) return;
       const items = snap && snap.content && snap.content.projects && snap.content.projects.items;
       if (!items || !items.length) { empty(body, "No projects on this page."); return; }
-      const intro = (snap.content.projects.intro || "").replace(/\*/g, "");
+      if (!body.closest(".os-phone")) {
+        const intro = (snap.content.projects.intro || "").replace(/\*/g, "");
+        body.innerHTML =
+          (intro ? '<p class="os-lead">' + esc(intro) + "</p>" : "") +
+          '<div class="os-grid">' +
+          items.map((p) =>
+            '<button type="button" class="os-tile" data-proj="' + esc(p.id) + '"><b>' + esc(p.title) +
+            "</b><small>" + esc(p.sub || "") + "</small>" + statusHTML(p.status) + "</button>",
+          ).join("") +
+          "</div>";
+        body.querySelectorAll("[data-proj]").forEach((btn) => {
+          btn.addEventListener("click", () => ctx.open("proj:" + btn.dataset.proj));
+        });
+        return;
+      }
       body.innerHTML =
-        (intro ? '<p class="os-lead">' + esc(intro) + "</p>" : "") +
-        '<div class="os-grid">' +
-        items.map((p) =>
-          '<button type="button" class="os-tile" data-proj="' + esc(p.id) + '"><b>' + esc(p.title) +
-          "</b><small>" + esc(p.sub || "") + "</small>" + statusHTML(p.status) + "</button>",
-        ).join("") +
-        "</div>";
-      body.querySelectorAll("[data-proj]").forEach((btn) => {
-        btn.addEventListener("click", () => ctx.open("proj:" + btn.dataset.proj));
+        '<div class="os-finder"><div class="os-finder-side" role="tablist" aria-label="Projects" aria-orientation="vertical"></div><div class="os-finder-main" role="tabpanel" tabindex="0"></div></div>';
+      const list = body.querySelector(".os-finder-side");
+      const panel = body.querySelector(".os-finder-main");
+      const tabs = items.map((p, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.setAttribute("role", "tab");
+        b.dataset.proj = p.id;
+        b.setAttribute("aria-selected", "false");
+        b.tabIndex = -1;
+        b.innerHTML = "<b>" + esc(p.title || "") + "</b><small>" + esc(p.status || "") + "</small>";
+        b.addEventListener("click", () => select(i));
+        list.appendChild(b);
+        return b;
       });
+      function select(i) {
+        if (demo) { demo.destroy(); demo = null; }
+        tabs.forEach((t, k) => {
+          const on = k === i;
+          t.setAttribute("aria-selected", on ? "true" : "false");
+          t.tabIndex = on ? 0 : -1;
+        });
+        const p = items[i];
+        const mergify = /mergify/i.test(p.title || "");
+        panel.innerHTML =
+          '<article class="os-project"><p class="os-kicker">' + esc(p.sub || "") + " " + statusHTML(p.status) + "</p>" +
+          "<p>" + rich(p.desc || "") + "</p>" +
+          tagsHTML(p.tags) +
+          (mergify ? "" : flowHTML(p.flow)) +
+          ledgerHTML(p.ledger) +
+          linkHTML(p) +
+          (mergify ? '<div class="os-stage" data-stage></div>' : "") +
+          "</article>";
+        if (!mergify) return;
+        const stage = panel.querySelector("[data-stage]");
+        loadMergify().then(() => {
+          if (dead || !stage || !stage.isConnected || !window.MergifyDemo) return;
+          demo = window.MergifyDemo.mount(stage, {
+            autoplay: true,
+            flow: p.flow && p.flow.length ? p.flow : undefined,
+          });
+        }).catch(() => {
+          if (stage && stage.isConnected) stage.innerHTML = '<p class="os-empty">The pipeline did not load. Refresh and open the window again.</p>';
+        });
+      }
+      select(0);
+      phoneDrawer(body.querySelector(".os-finder"), list);
     });
-    return () => { dead = true; };
+    return () => {
+      dead = true;
+      if (demo) demo.destroy();
+    };
   }
 
   function mountProject(pid, body, ctx) {
@@ -244,6 +342,7 @@
         tabs[n].focus();
       });
       select(0);
+      phoneDrawer(body.querySelector(".os-finder"), list);
     });
     return () => { dead = true; };
   }
