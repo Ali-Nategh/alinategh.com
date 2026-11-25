@@ -948,24 +948,56 @@
         return "";
     }
 
+    /* The play control is static HTML so the teaser is in the first paint.
+       js/mergify.js is fetched only after a click or `run mergify`. */
+    function mergifySlot() {
+        return `<div class="mf-slot">
+  <button type="button" class="mf-play" data-mergify-play aria-expanded="false" aria-controls="mergifyDemo">
+    <span class="mf-play-row">
+      <span class="mf-play-ico" aria-hidden="true"><svg viewBox="0 0 16 16" width="14" height="14"><path fill="currentColor" d="M5 3.2v9.6l8-4.8z"/></svg></span>
+      <span class="mf-play-text"><span class="mf-play-label">Play the pipeline</span><span class="mf-play-sub">Five orders. Two share an address. About 15 seconds.</span></span>
+    </span>
+    <span class="mf-preview" aria-hidden="true">
+      <span class="mf-frame">
+        <span class="mf-frame-top"><i></i><i></i><i></i><span>mergify · pipeline</span></span>
+        <span class="mf-frame-row"><span class="mf-dot is-twin">1042</span><span class="mf-dot">1043</span><span class="mf-dot is-twin">1044</span><span class="mf-dot">1045</span><span class="mf-dot">1046</span></span>
+        <span class="mf-frame-pipe">webhook → queue → worker → merged → saved</span>
+        <span class="mf-frame-end"><span>two orders, one address</span><b>$8.95 saved</b></span>
+      </span>
+    </span>
+  </button>
+  <div id="mergifyDemo" class="mf-stage" data-mergify-stage hidden></div>
+</div>`;
+    }
     function timelineSection(id, o, addLabel) {
-        return `<section class="sec${o.on ? "" : " is-off"}" id="${id}" data-section="${id}">${secTools(id, o.on)}
-    <div class="sec-head"><div><p class="eyebrow"><b>~/</b>${T(id + ".eyebrow")}</p>${T(id + ".title", "h2")}</div></div>
-    <div class="timeline">${C[id].items
-        .map((it, i) => {
-            const p = `${id}.items.${i}`,
-                pts = it.bullets || [];
-            return `
+        let mergifyPlaced = false;
+        const items = C[id].items
+            .map((it, i) => {
+                const p = `${id}.items.${i}`,
+                    pts = it.bullets || [];
+                const demo =
+                    id === "experience" &&
+                    !editing &&
+                    !mergifyPlaced &&
+                    /mergify/i.test(
+                        `${it.role || ""} ${it.org || ""} ${it.desc || ""}`,
+                    );
+                if (demo) mergifyPlaced = true;
+                return `
       <div class="t-item"><span class="t-node" aria-hidden="true"></span>
-        <article class="glass glow t-card" data-item="${id}.items" data-idx="${i}">${itemTools()}
+        <article class="glass glow t-card" data-item="${id}.items" data-idx="${i}"${demo ? " data-mergify-card" : ""}>${itemTools()}
           <h3>${T(p + ".role")} <span class="org">· ${T(p + ".org")}</span></h3>
           ${T(p + ".when", "p", "when")}
           ${it.desc || editing ? T(p + ".desc", "p") : ""}
+          ${demo ? mergifySlot() : ""}
           ${it.courses && (it.courses.length || editing) ? `<ul class="courses">${it.courses.map((c, j) => `<li><span class="cname">${T(`${p}.courses.${j}.0`)}</span><span class="grade${/^A/.test(c[1]) ? " top" : ""}">${T(`${p}.courses.${j}.1`)}</span>${editing ? `<button type="button" class="adm tag-x" data-tag-del="${p}.courses" data-i="${j}" aria-label="Remove course">×</button>` : ""}</li>`).join("")}</ul>${editing ? `<button type="button" class="adm tag-add" data-tag-add="${p}.courses" style="justify-self:start">+ course</button>` : ""}` : ""}
           ${pts.length || editing ? `<ul class="t-points">${pts.map((b, j) => `<li>${T(`${p}.bullets.${j}`)}${editing ? `<button type="button" class="adm tag-x" data-tag-del="${p}.bullets" data-i="${j}" aria-label="Remove point">×</button>` : ""}</li>`).join("")}</ul>${editing ? `<button type="button" class="adm tag-add" data-tag-add="${p}.bullets" style="justify-self:start">+ point</button>` : ""}` : ""}
         </article></div>`;
-        })
-        .join("")}${addBtn(id + ".items", addLabel)}</div></section>`;
+            })
+            .join("");
+        return `<section class="sec${o.on ? "" : " is-off"}" id="${id}" data-section="${id}">${secTools(id, o.on)}
+    <div class="sec-head"><div><p class="eyebrow"><b>~/</b>${T(id + ".eyebrow")}</p>${T(id + ".title", "h2")}</div></div>
+    <div class="timeline">${items}${addBtn(id + ".items", addLabel)}</div></section>`;
     }
     const SECT = {
         projects: (
@@ -4048,6 +4080,7 @@
         ["sudo", "reboot · hire " + C.site.first.toLowerCase()],
         ["trophies", "what you've found on this site"],
         ["echo-game", "Simon on the piano, starting with my name"],
+        ["run", "run mergify — watch five orders become one shipment"],
         ["clear", "clear the screen"],
         ["exit", "close the terminal (or press esc)"],
     ];
@@ -4295,6 +4328,26 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
                     : "trophies are not loaded.",
             ),
         "echo-game": () => startEchoGame(),
+        run: (a) => {
+            const what = String(a || "")
+                .trim()
+                .split(/\s+/)[0];
+            if (what !== "mergify")
+                return print('usage: run <span class="b">mergify</span>');
+            if (editing)
+                return print(
+                    "<span class=\"d\">close the editor first. The demo plays on the published page.</span>",
+                );
+            if (!document.querySelector("[data-mergify-card]"))
+                return print(
+                    "<span class=\"d\">the Mergify card is not on this page.</span>",
+                );
+            print(
+                '<span class="a">playing the merge</span> <span class="d">five orders, two from the same address</span>',
+            );
+            closeTTY();
+            document.dispatchEvent(new Event("mergify:play"));
+        },
         clear: () => (out.innerHTML = ""),
         exit: () => closeTTY(),
         date: () => print(new Date().toString()),
@@ -4684,8 +4737,11 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
         C = next;
         saved = clone(C);
         if (!editing || !dirty) {
-            if (!bootedPaint && painted === rev) paintShell();
-            else if (!same) {
+            // ?prerender=1 rebuilds from the templates. A matching content hash
+            // would otherwise keep the HTML already in index.html, so a new
+            // block in render() would never get baked.
+            if (!bootedPaint && painted === rev && !capture) paintShell();
+            else if (!same || (capture && !bootedPaint)) {
                 render();
                 if (editing) renderPanel();
             }

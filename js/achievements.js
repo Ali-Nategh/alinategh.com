@@ -158,6 +158,7 @@
     ["echo-name", "Echo: the name", "Repeat his name back to the piano."],
     ["echo-eight", "Echo: eight", "Stay with the echo a little longer."],
     ["echo-twelve", "Echo: encore", "Twelve notes, and you are still with it."],
+    ["mergify-watch", "One less label", "Let the five orders finish merging."],
   ].forEach(([id, name, hint]) => register({ id, name, hint }));
 
   window.Achievements = {

@@ -137,7 +137,7 @@ A sheet is a list of events. Each event is `{ k: [{ s, a }], d, dot }`, where `s
 
 Press `` ` `` or click **~/tty**. It has command history (↑ ↓) and accepts both built-in and custom commands:
 
-- **Built-in:** `help`, `whoami`, `projects`, `experience`, `education`, `certs`, `stack`, `music`, `play [sheet]`, `studio`, `contact`, `copy-email`, `theme <name>`, `goto <section>`, `ls`, `cat`, `date`, `echo`, `clear`, `exit`, `sudo …`
+- **Built-in:** `help`, `whoami`, `projects`, `experience`, `education`, `certs`, `stack`, `music`, `play [sheet]`, `studio`, `contact`, `copy-email`, `theme <name>`, `goto <section>`, `ls`, `cat`, `date`, `echo`, `run mergify`, `clear`, `exit`, `sudo …`
 - **Custom:** commands defined in `content.json` (editable from the editor's Terminal tab). Each one prints text and can optionally trigger an action: play a sheet, open a section, switch theme or open a link. The defaults are `coffee`, `fun-fact` and `signature`.
 
 </details>
@@ -189,6 +189,7 @@ His hair, skin, jacket, glasses and beard can be changed from the editor (`C.min
 │   ├── main.css          layout, themes, components, studio, editor
 │   ├── mini.css          mini Ali's canvas
 │   ├── eggs.css          trophies, developer mode, echo
+│   ├── mergify.css       order-merge teaser and pipeline
 │   └── notfound.css      the lost page
 ├── js/
 │   ├── app.js            content model, render, editor, themes, sphere, synths, studio, terminal
@@ -198,6 +199,8 @@ His hair, skin, jacket, glasses and beard can be changed from the editor (`C.min
 │   ├── eggs.js           unlocks for themes, the name in notes, and watching Mini Ali
 │   ├── konami.js         developer mode
 │   ├── echo.js           Simon on the home piano
+│   ├── mergify.js        order-merge pipeline (loaded on play)
+│   ├── mergify-card.js   play button, teaser, `run mergify`
 │   ├── console-hello.js  the devtools greeting and `hire()`
 │   └── notfound.js       the playable 404
 ├── assets/
@@ -299,6 +302,7 @@ A small toast and a short chime mark the unlock, and a count sits in the corner 
 - Open the console. `hire()` leaves my email. `miniAli.wave()` and `miniAli.do('music')` (also `'pushups'` and `'coding'`) poke the pixel
 - The Konami code (↑ ↑ ↓ ↓ ← → ← → B A) turns on developer mode
 - `play echo` or `echo-game`, or the **echo** button by the piano: Simon, and the melody starts with A · E · G · H
+- **Play the pipeline** on the BarAI card, or `run mergify`: five orders, two from the same address, one label saved. Staying to the end is a trophy
 - A missing URL is a small playable room. **Play the lost notes** and he finds his way back
 
 ---
