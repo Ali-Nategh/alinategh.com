@@ -562,3 +562,13 @@ body.editing .link-wrap:hover .item-tools,body.editing .link-wrap:focus-within .
 
 /* ---------- background: musical notes built from 0s and 1s (js/bitnotes.js) ---------- */
 #bitNotes{position:fixed; inset:0; width:100vw; height:100vh; z-index:0; pointer-events:none}
+
+/* AliOS is a desktop mode loaded only after someone boots it. This control stays
+   out of the way on phones and touch screens, where the scroll page is the site. */
+button.alios-boot{display:none}
+@media (min-width:1024px) and (min-height:640px){
+  button.alios-boot{display:inline-flex}
+}
+@media (pointer:coarse){
+  button.alios-boot{display:none}
+}

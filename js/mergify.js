@@ -476,6 +476,7 @@
     function blocked() {
       if (!root.isConnected) return true;
       if (document.hidden) return true;
+      if (document.body.classList.contains("alios")) return false;
       const home = document.getElementById("home");
       return !!(home && home.hidden);
     }
@@ -552,16 +553,29 @@
               flow[4] +
               ".",
           );
-          /* the trophy toast sits on the bottom edge; keep the total above it */
+          /* the trophy toast sits on the bottom edge; keep the total above it.
+             Inside AliOS the window scrolls, not the page underneath. */
           const saved = root.querySelector(".mf-saved");
           if (saved) {
-            const box = saved.getBoundingClientRect();
-            const limit = window.innerHeight - 120;
-            if (box.bottom > limit) {
-              window.scrollBy({
-                top: box.bottom - limit,
-                behavior: reduced ? "auto" : "smooth",
-              });
+            const scroller = document.body.classList.contains("alios") ? saved.closest(".os-body") : null;
+            if (scroller) {
+              const box = saved.getBoundingClientRect();
+              const host = scroller.getBoundingClientRect();
+              if (box.bottom > host.bottom - 12) {
+                scroller.scrollBy({
+                  top: box.bottom - host.bottom + 16,
+                  behavior: reduced ? "auto" : "smooth",
+                });
+              }
+            } else {
+              const box = saved.getBoundingClientRect();
+              const limit = window.innerHeight - 120;
+              if (box.bottom > limit) {
+                window.scrollBy({
+                  top: box.bottom - limit,
+                  behavior: reduced ? "auto" : "smooth",
+                });
+              }
             }
           }
         },
