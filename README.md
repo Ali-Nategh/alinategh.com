@@ -199,7 +199,7 @@ His hair, skin, jacket, glasses and beard can be changed from the editor (`C.min
 │   ├── achievements.js   trophy bus, toast, jingle, `trophies` data
 │   ├── eggs.js           unlocks for themes, the name in notes, and watching Mini Ali
 │   ├── konami.js         developer mode
-│   ├── echo.js           Simon on the home piano
+│   ├── echo.js           Simon on five keys, C to G
 │   ├── mergify.js        order-merge pipeline (loaded on play)
 │   ├── mergify-card.js   play button, teaser, `run mergify`
 │   ├── alios.js          AliOS desktop and window manager (loaded on boot)
@@ -297,7 +297,8 @@ Achievements.unlock("my-egg");
 
 A small toast and a short chime mark the unlock, and a count sits in the corner after the first one. `trophies` in the terminal lists them. Locked rows are a hint, not the name. Motion is dropped when the visitor has asked for less of it.
 
-- On a large screen, `startx` or **boot AliOS** opens a desktop: windows for the projects (the Mergify demo plays in that window), experience, the terminal, the studio, the piano, a résumé, trophies, themes and a fake system monitor. `logout`, `exit` or **log out** returns to the page. `shutdown` and `reboot` play the boot chime. Phones stay on the scrolling page
+- `startx` or **boot AliOS** opens a desktop. Under 900px wide or 640px tall it opens a phone home screen instead, with the same apps full screen. `logout`, `exit` or **log out** returns to the page. `shutdown` and `reboot` play the boot chime. The Mergify demo plays in the Mergify window. Settings can turn the CRT look down
+- `play echo` or the **echo** button is Simon on five keys, C D E F G. It works on the page and inside AliOS
 - `sudo reboot` in the terminal plays a boot chime written for the site
 - `sudo hire ali`
 - `signature` plays the notes hidden in my name: **A · E · G · H** (H is B in German notation). Playing those four notes yourself on the piano is its own trophy
@@ -305,7 +306,7 @@ A small toast and a short chime mark the unlock, and a count sits in the corner 
 - Click mini Ali, or wait and watch what he gets up to
 - Open the console. `hire()` leaves my email. `miniAli.wave()` and `miniAli.do('music')` (also `'pushups'` and `'coding'`) poke the pixel
 - The Konami code (↑ ↑ ↓ ↓ ← → ← → B A) turns on developer mode
-- `play echo` or `echo-game`, or the **echo** button by the piano: Simon, and the melody starts with A · E · G · H
+- `play echo` or `echo-game`, or the **echo** button by the piano: Simon on C D E F G. Keys `A S D F G` or `1`–`5`. The same game opens inside AliOS
 - **Play the pipeline** on the BarAI card, or `run mergify`: five orders, two from the same address, one label saved. Staying to the end is a trophy
 - A missing URL is a small playable room. **Play the lost notes** and he finds his way back
 

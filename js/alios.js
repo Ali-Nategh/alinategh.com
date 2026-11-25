@@ -1,6 +1,7 @@
 /* alios.js — AliOS, a desktop on top of the portfolio.
-   Loaded only after `startx` or the boot button, and only on a large screen.
-   Windows, the dock and the boot sequence live here. App bodies live in alios-apps.js.
+   Loaded only after `startx` or the boot button. A window under 900px wide
+   or 640px tall gets the phone shell instead. Windows, the dock, the phone
+   shell and the boot sequence live here. App bodies live in alios-apps.js.
    The terminal, studio and piano are the same elements as the rest of the site.
    Part of alinategh.com. Plain browser JavaScript, no build step. */
 (() => {
@@ -11,11 +12,11 @@
     { id: "experience", title: "Experience", mark: "Ex", w: 820, h: 540 },
     { id: "terminal", title: "Terminal", mark: ">_", w: 760, h: 500 },
     { id: "studio", title: "Studio", mark: "♪", w: 960, h: 660 },
-    { id: "piano", title: "Piano", mark: "Kb", w: 860, h: 380 },
+    { id: "piano", title: "Piano", mark: "Kb", w: 860, h: 560 },
     { id: "about", title: "About", mark: "An", w: 560, h: 500 },
     { id: "resume", title: "Résumé", mark: "Cv", w: 720, h: 640 },
     { id: "trophies", title: "Trophies", mark: "★", w: 680, h: 500 },
-    { id: "settings", title: "Settings", mark: "St", w: 460, h: 440 },
+    { id: "settings", title: "Settings", mark: "St", w: 480, h: 640 },
     { id: "monitor", title: "Monitor", mark: "Sy", w: 440, h: 480 },
   ];
   const APP_BY_ID = Object.fromEntries(APPS.map((a) => [a.id, a]));
@@ -44,7 +45,12 @@
   const memory = new Map();
   const seen = new Set();
   const themeFns = new Set();
-  let shell, menu, desk, dock, layer, laneEl, bootEl, logEl, enterBtn, liveEl, frontEl, clockEl;
+  let shell, menu, desk, dock, layer, laneEl, bootEl, logEl, enterBtn, liveEl, frontEl, clockEl, phoneEl;
+  let phoneSwipe = null;
+  let miniOn = false;
+  let phoneApp = null;
+  let phoneCleanup = null;
+  let grainStop = () => {};
   let on = false;
   let bootedAt = 0;
   let zTop = 4;
@@ -108,9 +114,62 @@
     if (seen.size === APPS.length && window.Achievements) Achievements.unlock("alios-suite");
   }
   function stats() {
+    if (miniOn) {
+      const spec = phoneApp && specFor(phoneApp);
+      return { open: spec ? [spec.title] : [] };
+    }
     return {
       open: [...windows.values()].filter((w) => !w.el.hidden).map((w) => w.name),
     };
+  }
+  function wantsMini() {
+    return innerWidth < 900 || innerHeight < 640;
+  }
+  function readCrt() {
+    try {
+      const v = localStorage.getItem("an.alios.crt");
+      if (v === "off" || v === "soft" || v === "full") return v;
+    } catch { /* private mode */ }
+    return "full";
+  }
+  function setCrt(level) {
+    if (!shell || !["off", "soft", "full"].includes(level)) return;
+    shell.dataset.crt = level;
+    try { localStorage.setItem("an.alios.crt", level); } catch { /* private mode */ }
+    grainStop();
+    if (level === "full") grainStop = startGrain();
+  }
+  function startGrain() {
+    const canvas = shell.querySelector(".os-grain");
+    if (!canvas) return () => {};
+    const ctx = canvas.getContext("2d", { alpha: true });
+    let timer = 0;
+    let dead = false;
+    const paint = () => {
+      if (dead) return;
+      const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const hidden = document.hidden || shell.hidden || shell.dataset.crt !== "full";
+      if (reduceMotion || hidden) {
+        timer = setTimeout(paint, 400);
+        return;
+      }
+      const w = 96;
+      const h = 64;
+      if (canvas.width !== w) { canvas.width = w; canvas.height = h; }
+      const img = ctx.createImageData(w, h);
+      const data = img.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const n = Math.random() * 255;
+        data[i] = n;
+        data[i + 1] = n;
+        data[i + 2] = n;
+        data[i + 3] = 28;
+      }
+      ctx.putImageData(img, 0, 0);
+      timer = setTimeout(paint, 90);
+    };
+    paint();
+    return () => { dead = true; clearTimeout(timer); };
   }
 
   function ensure() {
@@ -135,6 +194,20 @@
       '<div class="os-layer"></div>' +
       "</div>" +
       '<nav class="os-dock" aria-label="Dock"><div class="os-dock-apps"></div><div class="os-lane" aria-hidden="true"></div></nav>' +
+      '<div class="os-phone" hidden>' +
+      '<header class="os-phone-bar">' +
+      '<button type="button" class="os-phone-back" hidden>home</button>' +
+      '<span class="os-phone-title">AliOS</span>' +
+      '<time class="os-phone-clock"></time>' +
+      '<button type="button" class="os-phone-out">log out</button>' +
+      "</header>" +
+      '<div class="os-phone-home"></div>' +
+      '<div class="os-phone-app" hidden></div>' +
+      '<button type="button" class="os-phone-homebar">home</button>' +
+      "</div>" +
+      '<canvas class="os-grain" aria-hidden="true"></canvas>' +
+      '<div class="os-scan" aria-hidden="true"></div>' +
+      '<div class="os-vignette" aria-hidden="true"></div>' +
       '<div class="os-boot" hidden>' +
       '<div class="os-boot-log" role="status" aria-live="polite"></div>' +
       '<button type="button" class="os-enter">enter the desktop</button>' +
@@ -152,6 +225,30 @@
     liveEl = shell.querySelector(".os-live");
     frontEl = shell.querySelector(".os-front");
     clockEl = shell.querySelector(".os-clock");
+    phoneEl = shell.querySelector(".os-phone");
+    buildPhoneHome();
+    shell.querySelector(".os-phone-back").addEventListener("click", () => showPhone(null));
+    shell.querySelector(".os-phone-homebar").addEventListener("click", () => showPhone(null));
+    shell.querySelector(".os-phone-out").addEventListener("click", logout);
+    const phoneAppEl = shell.querySelector(".os-phone-app");
+    phoneAppEl.addEventListener("pointerdown", (e) => {
+      if (e.clientX > 28) { phoneSwipe = null; return; }
+      phoneSwipe = { x: e.clientX, y: e.clientY, id: e.pointerId };
+    });
+    phoneAppEl.addEventListener("pointerup", (e) => {
+      if (!phoneSwipe || e.pointerId !== phoneSwipe.id) return;
+      if (e.clientX - phoneSwipe.x > 72 && Math.abs(e.clientY - phoneSwipe.y) < 90) showPhone(null);
+      phoneSwipe = null;
+    });
+    phoneAppEl.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape" || !phoneApp) return;
+      const t = e.target;
+      if (t.closest && t.closest("input, textarea, select, #tty")) return;
+      if (t.isContentEditable) return;
+      e.preventDefault();
+      showPhone(null);
+    });
+    setCrt(readCrt());
     const icons = shell.querySelector(".os-icons");
     const apps = shell.querySelector(".os-dock-apps");
     APPS.forEach((app) => {
@@ -184,11 +281,15 @@
       }
     });
     addEventListener("resize", () => {
-      if (!on) return;
-      windows.forEach((w) => {
-        if (w.el.classList.contains("is-max")) fill(w);
-        else clamp(w.el);
-      });
+      if (!on || (bootEl && !bootEl.hidden)) return;
+      const mini = wantsMini();
+      if (mini !== miniOn) setMode(mini);
+      else if (!mini) {
+        windows.forEach((w) => {
+          if (w.el.classList.contains("is-max")) fill(w);
+          else clamp(w.el);
+        });
+      }
     });
     addEventListener("theme:used", (e) => {
       themeFns.forEach((fn) => fn(e.detail));
@@ -223,6 +324,7 @@
     menu.inert = busy;
     desk.inert = busy;
     dock.inert = busy;
+    if (phoneEl) phoneEl.inert = busy;
   }
   function addLine(text) {
     const p = document.createElement("p");
@@ -269,8 +371,13 @@
         minute: "2-digit",
         hour12: true,
       }).format(new Date());
+      const phoneClock = shell && shell.querySelector(".os-phone-clock");
       clockEl.textContent = label;
       clockEl.setAttribute("aria-label", "Toronto time, " + label);
+      if (phoneClock) {
+        phoneClock.textContent = label;
+        phoneClock.setAttribute("aria-label", "Toronto time, " + label);
+      }
     };
     tick();
     clockTimer = setInterval(tick, 1000);
@@ -384,6 +491,106 @@
       marker.remove();
     };
   }
+  function buildPhoneHome() {
+    const home = shell.querySelector(".os-phone-home");
+    home.innerHTML = '<div class="os-phone-grid" role="list"></div>';
+    const grid = home.querySelector(".os-phone-grid");
+    APPS.forEach((app) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "os-phone-appbtn";
+      btn.dataset.app = app.id;
+      btn.innerHTML = '<span class="os-mark" aria-hidden="true">' + app.mark + "</span><span>" + app.title + "</span>";
+      btn.addEventListener("click", () => showPhone(app.id));
+      grid.appendChild(btn);
+    });
+  }
+  function makeApi(setTitle) {
+    return {
+      open,
+      content: askContent,
+      setTitle: setTitle || (() => {}),
+      onTheme(fn) {
+        themeFns.add(fn);
+        return () => themeFns.delete(fn);
+      },
+      stats,
+      since() { return bootedAt; },
+    };
+  }
+  function mountInto(id, body, setTitle) {
+    try {
+      if (id === "terminal") return embedTerminal(body);
+      if (id === "studio") return embedStudio(body);
+      if (id === "piano") return embedPiano(body);
+      if (window.AliOSApps) return window.AliOSApps.mount(id, body, makeApi(setTitle)) || (() => {});
+    } catch (err) {
+      body.textContent = "This app did not open.";
+      console.warn(err);
+    }
+    return () => {};
+  }
+  function showPhone(id) {
+    if (!phoneEl) return;
+    const home = shell.querySelector(".os-phone-home");
+    const app = shell.querySelector(".os-phone-app");
+    const back = shell.querySelector(".os-phone-back");
+    const title = shell.querySelector(".os-phone-title");
+    if (phoneCleanup) {
+      try { phoneCleanup(); } catch (err) { console.warn(err); }
+      phoneCleanup = null;
+    }
+    phoneApp = id || null;
+    if (!id) {
+      app.hidden = true;
+      app.innerHTML = "";
+      home.hidden = false;
+      back.hidden = true;
+      title.textContent = "AliOS";
+      return;
+    }
+    home.hidden = true;
+    app.hidden = false;
+    app.innerHTML = "";
+    back.hidden = false;
+    const spec = specFor(id);
+    title.textContent = spec ? spec.title : "AliOS";
+    phoneCleanup = mountInto(id, app, (text) => { title.textContent = text; });
+    mark(id);
+  }
+  function setMode(mini) {
+    const keep = miniOn ? phoneApp : focusedDesktopApp();
+    if (mini) {
+      closeAll();
+      miniOn = true;
+      document.body.classList.add("alios-mini");
+      document.body.classList.remove("alios-desk");
+      phoneEl.hidden = false;
+      unpark();
+      showPhone(keep);
+    } else {
+      const app = phoneApp;
+      showPhone(null);
+      miniOn = false;
+      document.body.classList.remove("alios-mini");
+      document.body.classList.add("alios-desk");
+      phoneEl.hidden = true;
+      park();
+      if (app) open(app);
+      else if (frontEl) frontEl.textContent = "";
+    }
+  }
+  function focusedDesktopApp() {
+    let best = null;
+    let z = -1;
+    windows.forEach((w) => {
+      if (w.dead || w.el.hidden) return;
+      const zi = parseInt(w.el.style.zIndex, 10) || 0;
+      if (zi >= z) { z = zi; best = w.id; }
+    });
+    return best;
+  }
+
   function embedTerminal(body) {
     const tty = document.getElementById("tty");
     if (!tty) {
@@ -525,31 +732,12 @@
       addEventListener("pointerup", up);
     });
     const body = el.querySelector(".os-body");
-    const api = {
-      open,
-      content: askContent,
-      setTitle(text) {
-        w.name = String(text || spec.title);
-        el.querySelector(".os-title-text").textContent = w.name;
-        el.setAttribute("aria-label", w.name);
-        if (el.classList.contains("is-focus") && frontEl) frontEl.textContent = w.name;
-      },
-      onTheme(fn) {
-        themeFns.add(fn);
-        return () => themeFns.delete(fn);
-      },
-      stats,
-      since() { return bootedAt; },
-    };
-    try {
-      if (spec.id === "terminal") w.cleanup = embedTerminal(body);
-      else if (spec.id === "studio") w.cleanup = embedStudio(body);
-      else if (spec.id === "piano") w.cleanup = embedPiano(body);
-      else if (window.AliOSApps) w.cleanup = window.AliOSApps.mount(spec.id, body, api);
-    } catch (err) {
-      body.textContent = "This window did not open.";
-      console.warn(err);
-    }
+    w.cleanup = mountInto(spec.id, body, (text) => {
+      w.name = String(text || spec.title);
+      el.querySelector(".os-title-text").textContent = w.name;
+      el.setAttribute("aria-label", w.name);
+      if (el.classList.contains("is-focus") && frontEl) frontEl.textContent = w.name;
+    });
     focusWin(w, spec.id !== "terminal");
     mark(spec.id);
     live(w.name + " open.");
@@ -587,6 +775,10 @@
     try { if (w.cleanup) w.cleanup(); } catch (err) { console.warn(err); }
     w.el.remove();
     syncDock();
+    if (!miniOn && frontEl) {
+      const next = focusedDesktopApp();
+      frontEl.textContent = next && windows.get(next) ? windows.get(next).name : "";
+    }
     if (silent) return;
     live(w.name + " closed.");
     const btn = shell.querySelector('[data-dock="' + (APP_BY_ID[id] ? id : "projects") + '"]');
@@ -603,6 +795,7 @@
   }
   function open(id) {
     if (!on || !id) return;
+    if (miniOn) { showPhone(id); return; }
     const existing = windows.get(id);
     if (existing) {
       if (existing.el.hidden) showWin(existing);
@@ -629,35 +822,38 @@
   }
 
   function arrive() {
-    document.body.classList.add("alios-desk");
     if (!bootedAt) bootedAt = Date.now();
-    const first = shell.querySelector(".os-icon");
-    if (first) first.focus();
+    setMode(wantsMini());
+    if (window.Achievements) Achievements.unlock("alios-boot");
+    live(wantsMini() ? "AliOS is ready." : "AliOS is ready. Log out leaves the desktop.");
+    if (!wantsMini()) {
+      const first = shell.querySelector(".os-icon");
+      if (first) first.focus();
+    }
   }
   function boot() {
     if (on) return;
     ensure();
+    setCrt(readCrt());
     on = true;
     shell.hidden = false;
     document.body.classList.add("alios");
     dispatchEvent(new Event("alios:state"));
-    park();
     startClock();
     chime("boot");
-    runSequence(BOOT_LINES, "enter the desktop", () => {
+    runSequence(BOOT_LINES, wantsMini() ? "enter" : "enter the desktop", () => {
       arrive();
-      if (window.Achievements) Achievements.unlock("alios-boot");
-      live("AliOS is ready. Log out leaves the desktop.");
     });
   }
   function reboot() {
     if (!on) return;
     document.body.classList.remove("alios-desk");
+    document.body.classList.remove("alios-mini");
     chime("shutdown");
     runSequence(DOWN_LINES, "skip", () => {
       chime("boot");
-      runSequence(BOOT_LINES, "enter the desktop", () => {
-        document.body.classList.add("alios-desk");
+      runSequence(BOOT_LINES, wantsMini() ? "enter" : "enter the desktop", () => {
+        setMode(wantsMini());
         live("AliOS restarted.");
       });
     });
@@ -673,12 +869,16 @@
     seq += 1;
     clearTimers();
     enterAction = null;
+    showPhone(null);
     closeAll();
     stopClock();
     unpark();
+    grainStop();
     on = false;
+    miniOn = false;
     bootedAt = 0;
     document.body.classList.remove("alios-desk");
+    document.body.classList.remove("alios-mini");
     document.body.classList.remove("alios");
     bootEl.hidden = true;
     setInert(false);
@@ -694,9 +894,19 @@
   addEventListener("alios:reboot", reboot);
   addEventListener("alios:open", (e) => { if (on) open(e.detail); });
   addEventListener("alios:tty-closed", () => {
+    if (miniOn && phoneApp === "terminal") {
+      showPhone(null);
+      return;
+    }
     const w = windows.get("terminal");
     if (w && !w.dead) closeWindow("terminal");
   });
+  addEventListener("alios:echo", () => {
+    if (!on) return;
+    open("piano");
+    setTimeout(() => { if (window.EchoGame) EchoGame.start(); }, 40);
+  });
+  addEventListener("alios:crt", (e) => setCrt(e.detail));
 
   window.AliOS = { boot, logout, shutdown, reboot, open, running: () => on };
 })();

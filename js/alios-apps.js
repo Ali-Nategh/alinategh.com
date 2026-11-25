@@ -382,9 +382,17 @@
           '<span class="os-swatch" data-swatch="' + esc(t.id) + '" aria-hidden="true"></span>' + esc(t.label) + "</button>",
         ).join("") +
         "</div>" +
+        '<p class="os-kicker">CRT</p>' +
+        '<div class="os-radios" role="radiogroup" aria-label="CRT intensity">' +
+        ["full", "soft", "off"].map((id) => {
+          const label = id === "full" ? "Full" : id === "soft" ? "Soft" : "Off";
+          const on = (document.querySelector(".os") || {}).dataset.crt === id;
+          return '<button type="button" role="radio" data-crt="' + id + '" aria-checked="' + on + '">' + label + "</button>";
+        }).join("") +
+        "</div>" +
         '<p class="os-note">' + (motion
-          ? "Reduced motion is on, so AliOS keeps still."
-          : "Motion follows the system setting.") + "</p>" +
+          ? "Reduced motion is on, so the CRT stays still."
+          : "Full adds a moving grain and a faint flicker. Soft keeps the scanlines still.") + "</p>" +
         '<p class="os-note">With a window title focused, the arrow keys move it. Shift and the arrow keys resize it. Escape closes it.</p>' +
         "</div>";
       const group = body.querySelector(".os-radios");
@@ -404,6 +412,13 @@
         e.preventDefault();
         btns[n].focus();
         btns[n].click();
+      });
+      const crt = body.querySelectorAll("[data-crt]");
+      crt.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          crt.forEach((b) => b.setAttribute("aria-checked", b === btn ? "true" : "false"));
+          dispatchEvent(new CustomEvent("alios:crt", { detail: btn.dataset.crt }));
+        });
       });
     });
     return () => { dead = true; off(); };
@@ -427,7 +442,7 @@
       if (dead || !body.isConnected) return;
       const m = mood();
       moodEl.textContent = "Mini Ali is " + m + ".";
-      const n = Math.max(6, Math.min(96, 14 + Math.round(10 * Math.sin(Date.now() / 800)) + (performance.now() - lastNote < 2500 ? 30 : 0)));
+      const n = Math.max(6, Math.min(96, 14 + Math.round(10 * Math.sin(Date.now() / 800)) + (heardNote && performance.now() - lastNote < 2500 ? 30 : 0)));
       noiseEl.style.width = n + "%";
       noiseN.textContent = n + "%";
       const since = ctx.since();

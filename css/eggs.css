@@ -99,6 +99,27 @@ html.dev-mode .dev-badge {
   cursor: pointer;
 }
 .echo-status { margin: 0; color: var(--text); font-size: 13px; }
+.echo-keys { display: flex; gap: 8px; }
+.echo-key {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 76px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 2px;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(#fbf6ea, #e4dac3);
+  color: #24180a;
+  font: 600 22px/1 var(--display);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.echo-key small { font: 500 11px/1 var(--mono); color: #6d5c3e; letter-spacing: .08em; }
+.echo-key.is-lit { background: var(--accent); color: var(--on-accent); }
+.echo-key.is-lit small { color: var(--on-accent); }
+.echo-key.is-bad { background: var(--accent-2); color: #fff; }
 #echoLaunch { justify-self: start; }
 
 @media (prefers-reduced-motion: reduce) {

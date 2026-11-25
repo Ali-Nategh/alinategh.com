@@ -158,7 +158,7 @@ body.alios .toast {
   overflow: hidden;
   animation: os-in 0.18s ease-out;
 }
-@keyframes os-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes os-in { from { transform: translateY(8px); } }
 .os-win.is-focus { border-color: var(--accent); box-shadow: 0 28px 70px -24px #000, 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
 .os-titlebar {
   display: flex;
@@ -442,4 +442,139 @@ body.alios-desk #mini.mini-lane { z-index: 84; }
 
 @media (prefers-reduced-motion: reduce) {
   .os-win { animation: none; }
+}
+
+/* Phone shell. The desktop chrome stays out of the way. */
+body.alios-mini .os-menu,
+body.alios-mini .os-desk,
+body.alios-mini .os-dock { display: none; }
+body.alios-mini .os { border-radius: 0; }
+.os-phone { flex: 1; min-height: 0; display: flex; flex-direction: column; background: transparent; }
+.os-phone[hidden] { display: none !important; }
+.os-phone-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel-solid) 88%, transparent);
+}
+.os-phone-title { font-family: var(--display); font-style: italic; color: var(--accent); }
+.os-phone-clock { margin-left: auto; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.os-phone-back,
+.os-phone-out,
+.os-phone-homebar {
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--sunk);
+  color: var(--text);
+  font: 500 13px var(--mono);
+  cursor: pointer;
+}
+.os-phone-out { color: var(--on-accent); background: var(--accent); border-color: transparent; }
+.os-phone-home { flex: 1; min-height: 0; overflow: auto; }
+.os-phone-home[hidden] { display: none !important; }
+.os-phone-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px 14px 24px;
+}
+.os-phone-appbtn {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 6px;
+  min-height: 92px;
+  padding: 10px 6px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel-solid) 75%, transparent);
+  color: var(--text);
+  font: 500 12px/1.2 var(--mono);
+  cursor: pointer;
+}
+.os-phone-app { flex: 1; min-height: 0; overflow: auto; padding: 12px 14px 18px; }
+.os-phone-app[hidden] { display: none !important; }
+.os-phone-homebar { margin: 8px auto 12px; min-width: 120px; }
+.os-phone-app:has(> #tty),
+.os-phone-app:has(> #studio) { display: flex; flex-direction: column; padding: 0; }
+.os-phone-app > #tty {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  padding: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+.os-phone-app > #tty .tty-win {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  animation: none;
+}
+.os-phone-app > #tty .term-chrome { display: none; }
+.os-phone-app > #studio { display: grid; max-width: none; margin: 0; padding: 12px 12px 28px; }
+.os-phone-app > .piano-box { padding: 8px 4px 12px; }
+
+/* CRT. Scanlines and the vignette are paint-only. Grain is a small canvas. */
+.os-grain,
+.os-scan,
+.os-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.os-grain { z-index: 4; width: 100%; height: 100%; opacity: .45; mix-blend-mode: overlay; image-rendering: pixelated; }
+.os-scan {
+  z-index: 5;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, .38) 0 1px,
+    transparent 1px 3px
+  );
+  opacity: .9;
+}
+.os-vignette {
+  z-index: 5;
+  background: radial-gradient(ellipse at center, transparent 78%, rgba(0, 0, 0, .32) 100%);
+  box-shadow: inset 0 0 48px rgba(0, 0, 0, .22);
+}
+.os[data-crt="full"],
+.os[data-crt="soft"] { border-radius: 24px; overflow: hidden; }
+.os[data-crt="full"] .os-brand,
+.os[data-crt="full"] .os-title-text,
+.os[data-crt="full"] .os-phone-title,
+.os[data-crt="full"] .os-clock,
+.os[data-crt="full"] .os-phone-clock,
+.os[data-crt="soft"] .os-brand,
+.os[data-crt="soft"] .os-title-text,
+.os[data-crt="soft"] .os-phone-title {
+  text-shadow: 0 0 10px color-mix(in srgb, var(--accent) 90%, transparent), 0 0 2px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.os[data-crt="off"] .os-scan,
+.os[data-crt="off"] .os-vignette,
+.os[data-crt="off"] .os-grain,
+.os[data-crt="soft"] .os-grain { display: none; }
+.os[data-crt="soft"] .os-scan { opacity: .55; }
+@media (prefers-reduced-motion: no-preference) {
+  .os[data-crt="full"] .os-scan { animation: os-flicker 5.2s infinite; }
+}
+@keyframes os-flicker {
+  0%, 91%, 100% { opacity: .9; }
+  93% { opacity: .55; }
+  95% { opacity: .95; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .os-scan { animation: none !important; }
 }

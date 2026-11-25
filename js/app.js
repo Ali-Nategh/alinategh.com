@@ -1061,7 +1061,7 @@
       <div class="piano-box">
         <div class="piano-head"><span>~/piano · C4–G5</span><span class="note-read" id="noteRead" aria-live="polite">—</span></div>
         <div class="piano" id="homePiano" aria-label="Playable piano keyboard"></div>
-        <div class="piano-actions"><button class="btn claret" type="button" id="riff">${T("music.phraseLabel")}</button><button class="btn" type="button" id="echoLaunch" title="Simon-style game on this piano">echo</button><span class="name-notes" id="nameNotes" aria-hidden="true">${nameNotesHTML()}</span></div>
+        <div class="piano-actions"><button class="btn claret" type="button" id="riff">${T("music.phraseLabel")}</button><button class="btn" type="button" id="echoLaunch" title="Simon on five keys, C to G">echo</button><span class="name-notes" id="nameNotes" aria-hidden="true">${nameNotesHTML()}</span></div>
         ${T("music.phraseHint", "p", "hint")}
         <p class="hint">Click, tap or drag across the keys. On a keyboard, use <kbd>A</kbd>–<kbd>'</kbd> for white keys and <kbd>W</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>Y</kbd> <kbd>U</kbd> <kbd>O</kbd> <kbd>P</kbd> for black keys.</p>
       </div>
@@ -4092,15 +4092,7 @@
         ["clear", "clear the screen"],
         ["exit", "close the terminal, or leave AliOS"],
     ];
-    /* AliOS is a desktop mode. Its script and stylesheet load only when someone
-       boots it, and only on a large screen that is not a touch screen. */
-    function aliosFits() {
-        const big = matchMedia("(min-width: 1024px) and (min-height: 640px)").matches;
-        if (!big) return false;
-        if (matchMedia("(pointer: coarse)").matches) return false;
-        if (matchMedia("(hover: none)").matches && navigator.maxTouchPoints > 0) return false;
-        return true;
-    }
+    /* AliOS loads on boot. A narrow or short window gets the phone shell. */
     let aliosLoad = null;
     function loadAliOS() {
         if (window.AliOS) return Promise.resolve(window.AliOS);
@@ -4144,12 +4136,6 @@
         }
         if (editing) {
             say("<span class=\"a\">Close the editor before booting AliOS.</span>");
-            return;
-        }
-        if (!aliosFits()) {
-            say(
-                '<span class="a">AliOS needs a bigger screen.</span> <span class="d">This page stays a concert hall.</span>',
-            );
             return;
         }
         if (fromTty) {
@@ -4514,6 +4500,10 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
             );
     }
     function startEchoGame() {
+        if (document.body.classList.contains("alios")) {
+            dispatchEvent(new CustomEvent("alios:echo"));
+            return;
+        }
         closeTTY();
         if (location.hash === "#studio") location.hash = "music";
         else {
