@@ -50,14 +50,22 @@
 #crtScan, #crtVignette, #crtGrain{
   position:fixed; inset:0; z-index:3; pointer-events:none; display:none;
 }
-#crtScan{
-  background:repeating-linear-gradient(to bottom, rgba(0,0,0,.2) 0 1px, transparent 1px 3px);
+#crtScan{overflow:hidden; background:none}
+.crt-lines{
+  position:absolute; left:0; right:0; top:0; height:100%;
+  background:repeating-linear-gradient(to bottom, rgba(0,0,0,.22) 0 1px, transparent 1px 3px);
+  transform:translate3d(0,0,0);
+}
+.crt-refresh{
+  position:absolute; left:0; right:0; top:0; height:18%; opacity:0;
+  background:linear-gradient(to bottom, transparent, rgba(255,255,255,.05) 46%, rgba(255,255,255,.11) 50%, rgba(255,255,255,.05) 54%, transparent);
+  transform:translate3d(0,-140%,0);
 }
 #crtVignette{
   background:radial-gradient(ellipse at center, transparent 66%, rgba(0,0,0,.32) 100%);
 }
 #crtGrain{
-  width:100%; height:100%; opacity:.2; mix-blend-mode:overlay; image-rendering:pixelated;
+  width:100%; height:100%; opacity:.22; mix-blend-mode:normal;
 }
 :root[data-crt="soft"] #crtScan,
 :root[data-crt="full"] #crtScan,
@@ -66,12 +74,12 @@
 :root[data-crt="soft"] #crtScan{opacity:.5}
 :root[data-crt="soft"] #crtVignette{opacity:.55}
 :root[data-crt="full"] #crtGrain{display:block}
-:root[data-palette="crt"] #crtGrain{opacity:.22; mix-blend-mode:screen}
+:root[data-palette="crt"] #crtGrain{opacity:.26}
 :root[data-palette="light"][data-crt="full"] #crtScan{opacity:.4}
 :root[data-palette="light"][data-crt="soft"] #crtScan{opacity:.28}
 :root[data-palette="light"][data-crt="full"] #crtVignette{opacity:.4}
 :root[data-palette="light"][data-crt="soft"] #crtVignette{opacity:.28}
-:root[data-palette="light"] #crtGrain{opacity:.1}
+:root[data-palette="light"] #crtGrain{opacity:.16}
 :root[data-crt="soft"] h1,
 :root[data-crt="soft"] h2,
 :root[data-crt="soft"] .brand b,
@@ -95,22 +103,32 @@
 }
 body.alios #crtScan, body.alios #crtVignette, body.alios #crtGrain{display:none!important}
 @media (prefers-reduced-motion:no-preference){
-  :root[data-crt="full"] #crtScan{animation:crt-flicker 5.2s infinite}
-  :root[data-palette="light"][data-crt="full"] #crtScan{animation-name:crt-flicker-light}
+  :root[data-crt="full"] .crt-lines{
+    top:-48px; height:calc(100% + 96px);
+    animation:crt-drift 7.5s linear infinite;
+    will-change:transform;
+  }
+  :root[data-crt="full"] .crt-refresh{
+    animation:crt-refresh 9.5s linear infinite;
+    animation-delay:-7.2s;
+    will-change:transform;
+  }
 }
-@keyframes crt-flicker{
-  0%, 92%, 100%{opacity:1}
-  94%{opacity:.62}
-  96%{opacity:1}
+@keyframes crt-drift{
+  from{transform:translate3d(0,0,0)}
+  to{transform:translate3d(0,48px,0)}
 }
-@keyframes crt-flicker-light{
-  0%, 92%, 100%{opacity:.4}
-  94%{opacity:.26}
-  96%{opacity:.4}
+@keyframes crt-refresh{
+  0%, 62%{opacity:0; transform:translate3d(0,-140%,0)}
+  66%{opacity:.8}
+  84%{opacity:.35; transform:translate3d(0,640%,0)}
+  90%, 100%{opacity:0; transform:translate3d(0,640%,0)}
 }
+html.crt-paused .crt-lines,
+html.crt-paused .crt-refresh{animation-play-state:paused}
 @media (prefers-reduced-motion:reduce){
   #crtGrain{display:none!important}
-  #crtScan{animation:none!important}
+  .crt-lines,.crt-refresh,#crtScan{animation:none!important}
 }
 :root[data-palette="light"]{
   --bg-0:#dde3ee; --bg-1:#eceff6; --bg-2:#fbfcfe;
@@ -592,17 +610,44 @@ body.editing .link-wrap:hover .item-tools,body.editing .link-wrap:focus-within .
 .fav-opt{justify-items:center; text-align:center}
 .fav-opt img{border-radius:12px; display:block}
 .theme-btn{gap:8px}
-.tdot{width:16px; height:16px; flex:none; display:block; overflow:visible}
+.tdot{width:16px; height:16px; flex:none; display:block; overflow:visible; transform-origin:center; transform-box:fill-box; transition:transform .45s ease}
 .tdot .t-bg{fill:var(--bg-2)} .tdot .t-fill{fill:var(--accent)} .tdot .t-ring{fill:none; stroke:var(--accent); stroke-width:1.3}
-.theme-btn:hover .tdot{transform:rotate(180deg); transition:transform .4s ease}
+.theme-btn:hover .tdot,
+.theme-btn[aria-expanded="true"] .tdot{transform:rotate(180deg)}
 .theme-menu{position:fixed; z-index:85; min-width:210px; padding:6px; border-radius:14px; background:var(--panel-solid); border:1px solid var(--line-strong); box-shadow:0 18px 44px -14px rgba(0,0,0,.55); display:grid; gap:2px}
 .theme-menu button{all:unset; box-sizing:border-box; cursor:pointer; display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:9px; font:500 13px var(--mono); color:var(--text)}
 .theme-menu button:hover{background:var(--hover-wash)}
 .theme-menu button:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
 .theme-menu button[aria-checked="true"]{color:var(--accent)}
 .theme-menu button[aria-checked="true"]::after{content:"✓"; margin-left:auto}
-.theme-menu .sw{display:flex; width:36px; height:16px; border-radius:5px; overflow:hidden; border:1px solid rgba(127,127,127,.35); flex:none}
-.theme-menu .sw i{flex:1}
+/* Smooth theme pills. The fill is a child stretched past the caps so the
+   rounded ends stay on the gradient instead of a flat stop or a clipped fringe.
+   background-clip keeps the stroke off the fill. These sit above the CRT layers. */
+.theme-menu .sw,
+.os-swatch{
+  --pill:linear-gradient(90deg, #0a1124, #e2b25a);
+  position:relative; width:42px; height:16px; flex:none; display:block;
+  border-radius:999px; overflow:hidden; isolation:isolate;
+  border:1px solid color-mix(in srgb, var(--text) 28%, transparent);
+  background:transparent; background-clip:padding-box; -webkit-background-clip:padding-box;
+  transform:translateZ(0);
+}
+.theme-menu .sw::before,
+.os-swatch::before{
+  content:""; position:absolute; inset:0 -12px; background:var(--pill);
+}
+.theme-menu .sw[data-swatch="navy"],
+.os-swatch[data-swatch="navy"]{--pill:linear-gradient(90deg, #0a1124 0%, #131d3d 34%, #e2b25a 68%, #d9607f 100%)}
+.theme-menu .sw[data-swatch="burgundy"],
+.os-swatch[data-swatch="burgundy"]{--pill:linear-gradient(90deg, #1a0810 0%, #2e0f1d 34%, #f0b882 68%, #ff7d98 100%)}
+.theme-menu .sw[data-swatch="terminal"],
+.os-swatch[data-swatch="terminal"]{--pill:linear-gradient(90deg, #0c1218 0%, #0f1922 34%, #3ef5b8 68%, #6cc8ff 100%)}
+.theme-menu .sw[data-swatch="light"],
+.os-swatch[data-swatch="light"]{--pill:linear-gradient(90deg, #eceff6 0%, #ffffff 34%, #9b6416 68%, #b2385d 100%)}
+.theme-menu .sw[data-swatch="glass"],
+.os-swatch[data-swatch="glass"]{--pill:linear-gradient(90deg, #ff7ab8 0%, #6f7bff 40%, #1fc8c0 72%, #ffffff 100%)}
+.theme-menu .sw[data-swatch="crt"],
+.os-swatch[data-swatch="crt"]{--pill:linear-gradient(90deg, #04140c 0%, #0d241b 34%, #62ffb4 68%, #d6ff73 100%)}
 .theme-menu .crt-ctrl{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px; margin:4px 2px 2px; padding-top:6px; border-top:1px solid var(--line)}
 .theme-menu .crt-kicker{grid-column:1 / -1; font:500 10px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--dim); padding:0 4px 2px}
 .theme-menu .crt-ctrl button{justify-content:center; min-height:34px; padding:6px 4px; font-size:12px}
@@ -645,6 +690,7 @@ body.editing .link-wrap:hover .item-tools,body.editing .link-wrap:focus-within .
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important}
+  .theme-btn .tdot{transition:none}
 }
 
 /* ---------- background: musical notes built from 0s and 1s (js/bitnotes.js) ---------- */
