@@ -53,8 +53,8 @@ Plain HTML, CSS and JavaScript. No framework, no build step, no dependencies.
 | Behaviour | Vanilla JavaScript (ES2020+), no libraries | Everything here is small enough not to need a framework, and the page loads instantly |
 | Graphics | Canvas 2D (sphere, binary notes, mini Ali), inline SVG (staff notation, icons) | Full control over every pixel, and it stays sharp at any size |
 | Audio | Web Audio API: oscillators, filters, Karplus–Strong, a generated convolution reverb | Five instruments with zero audio files |
-| Fonts | [Fraunces](https://fonts.google.com/specimen/Fraunces), [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono), [Noto Music](https://fonts.google.com/noto/specimen/Noto+Music) from Google Fonts | A serif with character, a mono for the terminal look, and real music glyphs |
-| Content | `content.json` plus a typed default in `js/app.js` | A one-file CMS with no database |
+| Fonts | Self-hosted [Fraunces](https://fonts.google.com/specimen/Fraunces) and [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono), with [Noto Music](https://fonts.google.com/noto/specimen/Noto+Music) loaded only when notation is drawn | Same faces as before, without a render-blocking request to Google and without a layout jump when they arrive |
+| Content | `content.json` is the only published copy. `tools/prerender.mjs` writes it into `index.html` | A one-file CMS with no database, and the real text is in the first HTML response |
 | Hosting | Any static host. Included: nginx in Docker with gzip, caching and security headers | Runs anywhere, from a $0 VPS to GitHub Pages |
 | Assets | Python + Pillow scripts in `tools/` | The favicons and the link-preview image are generated, not hand-drawn |
 
@@ -65,7 +65,7 @@ Plain HTML, CSS and JavaScript. No framework, no build step, no dependencies.
 <details>
 <summary><b>Content model and the in-page editor</b></summary>
 
-Everything the home page and studio show lives in one object, `C`. The default copy (`DEFAULT` in `js/app.js`) is merged with `content.json` when the page loads, and `render()` builds every section from the merged object.
+Everything the home page and studio show lives in one object, `C`, loaded from `content.json`. That file is the published copy. `DEFAULT` in `js/app.js` is only a shape for missing keys and for the case where `content.json` cannot be fetched at all. The page does not paint `DEFAULT` and then swap it out: if `index.html` was pre-rendered from the same file, the script wires the piano and the sphere and leaves the markup alone.
 
 - Every editable piece of text has a `data-edit="path.to.field"` attribute. In edit mode those elements become `contentEditable`, and on `input` the new text is written back to that path in `C`.
 - Lists (experience bullets, projects, courses, links) get small ↑ ↓ ✕ tool buttons and a "+ add" card. The side panel (**Site · Sections · Item · Terminal**) covers what can't be clicked: section order and visibility, theme, tab icon, mini-Ali settings, terminal commands and so on.
@@ -170,7 +170,7 @@ His hair, skin, jacket, glasses and beard can be changed from the editor (`C.min
 <summary><b>Accessibility, performance and SEO</b></summary>
 
 - **Accessibility:** semantic landmarks, labelled controls, `aria-pressed` toggles, a keyboard-navigable theme menu (`menuitemradio`), and visible focus rings. The terminal is a labelled modal dialog. All animations respect `prefers-reduced-motion`.
-- **Performance:** the canvases pause when the tab is hidden, the background runs at a capped frame rate, resize work is debounced, and nothing loads apart from the fonts. All the HTML, CSS and JS together come to about 65 KB gzipped.
+- **Performance:** the canvases pause when the tab is hidden, the background runs at a capped frame rate, and resize work is debounced. Text fonts are self-hosted woff2 files with metric-matched fallbacks and `font-display: optional`, so a slow download cannot shove the hero down the page. Noto Music is requested only when the studio opens or the binary notes need a glyph.
 - **SEO:** a meta description, a canonical URL, Open Graph and Twitter cards with a generated 1200 × 630 preview image, `schema.org/Person` JSON-LD, `robots.txt` and `sitemap.xml`.
 
 </details>
@@ -184,20 +184,32 @@ His hair, skin, jacket, glasses and beard can be changed from the editor (`C.min
 ├── index.html            markup and meta tags
 ├── content.json          the site's content (export from the editor, or edit by hand)
 ├── css/
+│   ├── fonts.css         self-hosted faces and metric-matched fallbacks
+│   ├── music-font.css    Noto Music, loaded only when notation is drawn
 │   ├── main.css          layout, themes, components, studio, editor
-│   └── mini.css          mini Ali's canvas
+│   ├── mini.css          mini Ali's canvas
+│   ├── eggs.css          trophies, developer mode, echo
+│   └── notfound.css      the lost page
 ├── js/
 │   ├── app.js            content model, render, editor, themes, sphere, synths, studio, terminal
 │   ├── bitnotes.js       binary-note background
-│   └── mini.js           mini Ali
+│   ├── mini.js           mini Ali
+│   ├── achievements.js   trophy bus, toast, jingle, `trophies` data
+│   ├── eggs.js           unlocks for themes, the name in notes, and watching Mini Ali
+│   ├── konami.js         developer mode
+│   ├── echo.js           Simon on the home piano
+│   ├── console-hello.js  the devtools greeting and `hire()`
+│   └── notfound.js       the playable 404
 ├── assets/
+│   ├── fonts/            self-hosted woff2 files (OFL)
 │   ├── icons/            calligraphic-A tab icons (gray, brass, blend)
 │   └── og-image.jpg      link-preview card
+├── 404.html              lost page, served by nginx for unknown URLs
 ├── favicon.ico
 ├── robots.txt · sitemap.xml
 ├── deploy/               nginx config + security headers
 ├── docker-compose.yml
-├── tools/                asset and screenshot scripts
+├── tools/                asset, screenshot, and prerender scripts
 └── docs/                 README screenshots
 ```
 
@@ -215,6 +227,12 @@ python3 -m http.server 8000      # Windows: python -m http.server 8000   ·   or
 
 Then open <http://localhost:8000>, and <http://localhost:8000/#admin> to edit.
 
+After you change `content.json`, refresh the copy baked into `index.html` so the first paint and link previews stay in step with the file. This is not part of the deploy, and it needs Chrome:
+
+```bash
+node tools/prerender.mjs
+```
+
 ## Deploy
 
 **Docker + nginx** (what I use on a small VPS):
@@ -223,7 +241,9 @@ Then open <http://localhost:8000>, and <http://localhost:8000/#admin> to edit.
 docker compose up -d             # serves on :8080; put Caddy or Certbot in front for HTTPS
 ```
 
-The nginx config compresses text, makes browsers revalidate `index.html`, `content.json`, CSS and JS on every visit (so a deploy shows up immediately), caches images for a month, adds security headers, and refuses to serve `tools/`, `deploy/`, `docs/` and the README.
+The nginx config compresses text, makes browsers revalidate `index.html`, `content.json`, CSS and JS on every visit (so a deploy shows up immediately), caches images and fonts for a month, adds security headers, refuses to serve `tools/`, `deploy/`, `docs/` and the README, and answers unknown URLs with `404.html`.
+
+If a reverse proxy sits in front of this nginx (Caddy, another nginx, a CDN), it has to let that 404 body through. `proxy_intercept_errors` must stay off, which is the default. A proxy that replaces upstream errors with its own page will never show the lost hall.
 
 **GitHub Pages / Netlify / Cloudflare Pages:** point them at the repo root. No build command is needed.
 
@@ -248,11 +268,24 @@ node tools/screenshots.js        # docs/*.png                     (needs Playwri
 
 ## Easter eggs
 
+Trophies live in `localStorage` under `an.achievements`. Anything new can register one:
+
+```js
+Achievements.register({ id: "my-egg", name: "Shown once found", hint: "Shown while it is locked." });
+Achievements.unlock("my-egg");
+```
+
+A small toast and a short chime mark the unlock, and a count sits in the corner after the first one. `trophies` in the terminal lists them. Locked rows are a hint, not the name. Motion is dropped when the visitor has asked for less of it.
+
 - `sudo reboot` in the terminal plays a boot chime written for the site
 - `sudo hire ali`
-- `signature` plays the notes hidden in my name: **A · E · G · H** (H is B in German notation)
-- Click mini Ali. On desktop, wait and watch what he gets up to
-- Open the console and run `miniAli.do('music')`
+- `signature` plays the notes hidden in my name: **A · E · G · H** (H is B in German notation). Playing those four notes yourself on the piano is its own trophy
+- Use every colour theme
+- Click mini Ali, or wait and watch what he gets up to
+- Open the console. `hire()` leaves my email. `miniAli.wave()` and `miniAli.do('music')` (also `'pushups'` and `'coding'`) poke the pixel
+- The Konami code (↑ ↑ ↓ ↓ ← → ← → B A) turns on developer mode
+- `play echo` or `echo-game`, or the **echo** button by the piano: Simon, and the melody starts with A · E · G · H
+- A missing URL is a small playable room. **Play the lost notes** and he finds his way back
 
 ---
 

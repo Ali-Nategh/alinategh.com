@@ -1,0 +1,94 @@
+/* Self-hosted text faces. Noto Music is not here: css/music-font.css is added only when notation is drawn.
+   font-display: optional keeps a late download from swapping the hero out from under the first paint.
+   The fallback faces are metric-matched to Fraunces and IBM Plex Mono so the stand-in occupies the same box. */
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: optional;
+  src: url("../assets/fonts/fraunces-roman.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fraunces";
+  font-style: italic;
+  font-weight: 400 700;
+  font-display: optional;
+  src: url("../assets/fonts/fraunces-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url("../assets/fonts/ibm-plex-mono-400.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url("../assets/fonts/ibm-plex-mono-500.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: optional;
+  src: url("../assets/fonts/ibm-plex-mono-600.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: italic;
+  font-weight: 400;
+  font-display: optional;
+  src: url("../assets/fonts/ibm-plex-mono-400-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* size-adjust / ascent numbers come from the fonts' OS/2 averages against Noto Serif and Noto Sans Mono,
+   which is what Android and this site's Linux fallback resolve to. Georgia and Menlo are further down the local() list. */
+@font-face {
+  font-family: "Fraunces Fallback";
+  font-style: normal;
+  font-weight: 100 900;
+  src: local("Noto Serif"), local("Liberation Serif"), local("Georgia"), local("Times New Roman"), local("Times");
+  size-adjust: 101.76%;
+  ascent-override: 96.1%;
+  descent-override: 25.06%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Fraunces Fallback";
+  font-style: italic;
+  font-weight: 100 900;
+  src: local("Noto Serif Italic"), local("Liberation Serif Italic"), local("Georgia Italic"), local("Times New Roman Italic"), local("Times Italic");
+  size-adjust: 100.34%;
+  ascent-override: 97.47%;
+  descent-override: 25.41%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Plex Fallback";
+  font-style: normal;
+  font-weight: 100 900;
+  src: local("Noto Sans Mono"), local("Liberation Mono"), local("DejaVu Sans Mono"), local("Menlo"), local("Consolas");
+  size-adjust: 93.02%;
+  ascent-override: 110.19%;
+  descent-override: 29.56%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Plex Fallback";
+  font-style: italic;
+  font-weight: 100 900;
+  src: local("Noto Sans Mono"), local("Liberation Mono Italic"), local("DejaVu Sans Mono"), local("Menlo"), local("Consolas");
+  size-adjust: 93.02%;
+  ascent-override: 110.19%;
+  descent-override: 29.56%;
+  line-gap-override: 0%;
+}

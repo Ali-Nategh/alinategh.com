@@ -32,6 +32,20 @@
   /* turn a note glyph into a grid of cells, each cell a single 0 or 1 */
   const GLYPHS = ['♪', '♫', '♩', '♬', '𝄞'];
   const FONT = '"Noto Music", "Segoe UI Symbol", "Apple Symbols", "DejaVu Sans", serif';
+  /* Noto Music is not on the first-paint path. Ask for it after load, and don't cache a blank glyph. */
+  function armMusicFont() {
+    if (document.getElementById("musicFont")) return;
+    const link = document.createElement("link");
+    link.id = "musicFont";
+    link.rel = "stylesheet";
+    link.href = "css/music-font.css";
+    document.head.appendChild(link);
+    if (document.fonts && document.fonts.load) {
+      document.fonts.load('80px "Noto Music"').then(() => cache.clear()).catch(() => {});
+    }
+  }
+  if (document.readyState === "complete") armMusicFont();
+  else addEventListener("load", armMusicFont, { once: true });
   const CELL = 6;
   const cache = new Map();
   function cellsFor(ch, px) {
@@ -48,6 +62,7 @@
       if (d[(cy * s + cx) * 4 + 3] > 120) { raw.push([xx, y]); x0 = Math.min(x0, xx); y0 = Math.min(y0, y); x1 = Math.max(x1, xx); y1 = Math.max(y1, y); }
     }
     const mx = (x0 + x1) / 2, my = (y0 + y1) / 2;      // centre on the symbol itself, not on the box
+    if (raw.length < 4) return { cells: [], w: 0, h: 0 };
     const out = { cells: raw.map(([xx, y]) => [xx - mx, y - my]), w: x1 - x0 + CELL, h: y1 - y0 + CELL };
     cache.set(key, out); return out;
   }
