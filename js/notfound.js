@@ -3,8 +3,6 @@
 (() => {
   "use strict";
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const NAMES = ["C", "D", "E", "F", "G", "A", "B", "C"];
-  const MIDIS = [60, 62, 64, 65, 67, 69, 71, 72];
   let ctx, master;
 
   function audio() {
@@ -43,44 +41,97 @@
     o2.stop(t0 + (dur || 0.9) + 0.02);
   }
 
+  /* the same keyboard as the home page: C4 to G5, white and black keys, drag to glide */
+  const WHITE = [60, 62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79];
+  const BLACK = [[61, 0], [63, 1], [66, 3], [68, 4], [70, 5], [73, 7], [75, 8], [78, 10]]; // [midi, white key it sits after]
+  const KEYMAP = { a: 60, s: 62, d: 64, f: 65, g: 67, h: 69, j: 71, k: 72, l: 74, ";": 76, "'": 77, w: 61, e: 63, t: 66, y: 68, u: 70, o: 73, p: 75 };
+  const NOTE = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+  const nameOf = (m) => NOTE[m % 12];
   const row = document.getElementById("lostKeys");
   const read = document.getElementById("lostRead");
-  const buttons = [];
-  MIDIS.forEach((m, i) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = NAMES[i];
-    b.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      play(m, b);
-    });
-    row.appendChild(b);
-    buttons.push(b);
+  const keyEl = {};
+  WHITE.forEach((m) => {
+    const d = document.createElement("div");
+    d.className = "wk";
+    d.dataset.m = m;
+    if (m % 12 === 0) d.textContent = "C" + (Math.floor(m / 12) - 1);
+    row.appendChild(d);
+    keyEl[m] = d;
+  });
+  BLACK.forEach(([m, after]) => {
+    const d = document.createElement("div");
+    d.className = "bk";
+    d.dataset.m = m;
+    d.style.width = `calc(100% / ${WHITE.length} * .62)`;
+    d.style.left = `calc(${((after + 1) * 100) / WHITE.length}% - (100% / ${WHITE.length} * .31))`;
+    row.appendChild(d);
+    keyEl[m] = d;
   });
 
-  function light(btn) {
-    btn.classList.add("on");
-    setTimeout(() => btn.classList.remove("on"), reduce ? 40 : 180);
+  function light(m) {
+    const el = keyEl[m];
+    if (!el) return;
+    el.classList.add("on");
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove("on"), reduce ? 60 : 220);
   }
-  function play(midi, btn) {
+  /* he finds his way home when you play the lost notes yourself: C5, then F♯5 */
+  let prev = null;
+  function play(midi) {
     tone(midi, 0, 0.8);
-    if (btn) light(btn);
-    const name = NAMES[MIDIS.indexOf(midi)] || "";
-    if (read) read.textContent = name;
+    light(midi);
+    if (read) read.textContent = nameOf(midi);
+    if (prev === 72 && midi === 78) found();
+    prev = midi;
   }
 
-  /* C5 then F#5: the same unresolved tritone as the studio's 404 jingle */
+  let down = false, lastM = null;
+  const at = (x, y) => {
+    const t = document.elementFromPoint(x, y);
+    return t && t.dataset && t.dataset.m && row.contains(t) ? +t.dataset.m : null;
+  };
+  row.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    down = true;
+    try { row.setPointerCapture(e.pointerId); } catch {}
+    const m = at(e.clientX, e.clientY);
+    if (m != null) { play(m); lastM = m; }
+  });
+  row.addEventListener("pointermove", (e) => {
+    if (!down) return;
+    const m = at(e.clientX, e.clientY);
+    if (m != null && m !== lastM) { play(m); lastM = m; }
+  });
+  const up = () => { down = false; lastM = null; };
+  row.addEventListener("pointerup", up);
+  row.addEventListener("pointercancel", up);
+  addEventListener("keydown", (e) => {
+    if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    const m = KEYMAP[e.key.toLowerCase()];
+    if (m != null) play(m);
+  });
+
+  /* C5 then F♯5: the same unresolved tritone as the studio's 404 jingle */
   function jingle() {
     audio();
-    play(72, buttons[7]);
+    tone(72, 0, 0.8);
+    light(72);
     if (read) read.textContent = "C";
     setTimeout(() => {
       tone(78, 0, 1.1);
+      light(78);
       if (read) read.textContent = "C · F♯";
     }, reduce ? 180 : 420);
+    prev = null;
     if (window.Achievements) Achievements.unlock("lost-found");
   }
   document.getElementById("lostJingle").addEventListener("click", jingle);
+
+  function found() {
+    if (read) read.textContent = "C · F♯ · you found the lost notes";
+    if (window.miniAli && window.miniAli.say) window.miniAli.say("that's the way home!");
+    if (window.Achievements) Achievements.unlock("lost-found");
+  }
 
   const greet = () => {
     const ali = window.miniAli;
