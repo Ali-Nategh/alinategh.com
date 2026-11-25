@@ -119,6 +119,7 @@
         <link rel="stylesheet" href="css/main.css" />
         <link rel="stylesheet" href="css/mini.css" />
         <link rel="stylesheet" href="css/eggs.css" />
+        <link rel="stylesheet" href="css/mergify.css" />
         <script src="js/achievements.js" defer></script>
         <script src="js/app.js" defer></script>
         <script src="js/bitnotes.js" defer></script>
@@ -126,6 +127,7 @@
         <script src="js/eggs.js" defer></script>
         <script src="js/konami.js" defer></script>
         <script src="js/echo.js" defer></script>
+        <script src="js/mergify-card.js" defer></script>
         <script src="js/console-hello.js" defer></script>
     </head>
     <body>
@@ -198,10 +200,27 @@
     <div class="sec-head"><div><p class="eyebrow"><b>~/</b><span data-edit="experience.eyebrow">professional experience</span></p><h2 data-edit="experience.title">Experience.</h2></div></div>
     <div class="timeline">
       <div class="t-item"><span class="t-node" aria-hidden="true"></span>
-        <article class="glass glow t-card" data-item="experience.items" data-idx="0"><div class="adm item-tools" role="group" aria-label="Item tools"><button type="button" data-act="up" title="Move earlier" aria-label="Move earlier">↑</button><button type="button" data-act="down" title="Move later" aria-label="Move later">↓</button><button type="button" data-act="edit" title="Edit all fields" aria-label="Edit all fields">✎</button><button type="button" data-act="dup" title="Duplicate" aria-label="Duplicate">⧉</button><button type="button" class="del" data-act="del" title="Delete" aria-label="Delete">✕</button></div>
+        <article class="glass glow t-card" data-item="experience.items" data-idx="0" data-mergify-card=""><div class="adm item-tools" role="group" aria-label="Item tools"><button type="button" data-act="up" title="Move earlier" aria-label="Move earlier">↑</button><button type="button" data-act="down" title="Move later" aria-label="Move later">↓</button><button type="button" data-act="edit" title="Edit all fields" aria-label="Edit all fields">✎</button><button type="button" data-act="dup" title="Duplicate" aria-label="Duplicate">⧉</button><button type="button" class="del" data-act="del" title="Delete" aria-label="Delete">✕</button></div>
           <h3><span data-edit="experience.items.0.role">Software Engineer</span> <span class="org">· <span data-edit="experience.items.0.org">BarAI (startup)</span></span></h3>
           <p class="when" data-edit="experience.items.0.when">Mar 2023 — Apr 2025 · remote</p>
           <p data-edit="experience.items.0.desc">Mergify, a Shopify-integrated SaaS app for automated order merging.</p>
+          <div class="mf-slot">
+  <button type="button" class="mf-play" data-mergify-play="" aria-expanded="false" aria-controls="mergifyDemo">
+    <span class="mf-play-row">
+      <span class="mf-play-ico" aria-hidden="true"><svg viewBox="0 0 16 16" width="14" height="14"><path fill="currentColor" d="M5 3.2v9.6l8-4.8z"></path></svg></span>
+      <span class="mf-play-text"><span class="mf-play-label">Play the pipeline</span><span class="mf-play-sub">Five orders. Two share an address. About 15 seconds.</span></span>
+    </span>
+    <span class="mf-preview" aria-hidden="true">
+      <span class="mf-frame">
+        <span class="mf-frame-top"><i></i><i></i><i></i><span>mergify · pipeline</span></span>
+        <span class="mf-frame-row"><span class="mf-dot is-twin">1042</span><span class="mf-dot">1043</span><span class="mf-dot is-twin">1044</span><span class="mf-dot">1045</span><span class="mf-dot">1046</span></span>
+        <span class="mf-frame-pipe">webhook → queue → worker → merged → saved</span>
+        <span class="mf-frame-end"><span>two orders, one address</span><b>$8.95 saved</b></span>
+      </span>
+    </span>
+  </button>
+  <div id="mergifyDemo" class="mf-stage" data-mergify-stage="" hidden=""></div>
+</div>
           
           <ul class="t-points"><li><span data-edit="experience.items.0.bullets.0">Built and maintained production parts of Mergify: HTTP/REST APIs in Node.js (Express.js) and React front-end work, backed by Mocha/Chai unit tests and code reviews.</span></li><li><span data-edit="experience.items.0.bullets.1">Cut Shopify fetch time by 30% by moving 16+ functions from its REST API to GraphQL, including currency conversion for order data.</span></li><li><span data-edit="experience.items.0.bullets.2">Implemented BullMQ job queues handling 100+ concurrent jobs, with worker orchestration that prevents race conditions in order processing.</span></li><li><span data-edit="experience.items.0.bullets.3">Built the fault-tolerant undo-merge feature, walking order trees backwards to restore original states, which helped the app reach 4.6/5 on the Shopify App Store.</span></li><li><span data-edit="experience.items.0.bullets.4">Worked across SQL Server and MongoDB (Mongoose), and migrated services to AWS on EC2, S3 and Elastic Load Balancing.</span></li><li><span data-edit="experience.items.0.bullets.5">Handled on-call production support and incident analysis, completed 130+ user stories at a 90%+ rate in biweekly sprints, and wrote 1,900+ lines of API, schema and architecture docs.</span></li></ul>
         </article></div>
@@ -210,6 +229,7 @@
           <h3><span data-edit="experience.items.1.role">Web Developer</span> <span class="org">· <span data-edit="experience.items.1.org">Abanico Dance Studio</span></span></h3>
           <p class="when" data-edit="experience.items.1.when">2026 — present</p>
           <p data-edit="experience.items.1.desc">I keep the studio's site fast, accurate and easy to update, and I'm building out its online presence as the studio opens a café. I also perform with the studio's company on stage!</p>
+          
           
           
         </article></div><button type="button" class="adm add-item" data-add="experience.items">+ add entry</button></div></section><section class="sec" id="stack" data-section="stack"><div class="adm sec-tools" data-sec="stack"><span>Skills</span><button type="button" data-sact="up" aria-label="Move section up">↑</button><button type="button" data-sact="down" aria-label="Move section down">↓</button><button type="button" data-sact="toggle">hide</button></div>
@@ -313,6 +333,7 @@
           <h3><span data-edit="education.items.0.role">Bachelor of Computer Science</span> <span class="org">· <span data-edit="education.items.0.org">York University</span></span></h3>
           <p class="when" data-edit="education.items.0.when">2026 · Toronto, ON</p>
           <p data-edit="education.items.0.desc">Selected coursework and grades:</p>
+          
           <ul class="courses"><li><span class="cname"><span data-edit="education.items.0.courses.0.0">Design and Analysis of Algorithms</span></span><span class="grade top"><span data-edit="education.items.0.courses.0.1">A</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.1.0">Software Design</span></span><span class="grade top"><span data-edit="education.items.0.courses.1.1">A</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.2.0">Professional Practice in Computing</span></span><span class="grade top"><span data-edit="education.items.0.courses.2.1">A</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.3.0">Introduction to Computer Security</span></span><span class="grade"><span data-edit="education.items.0.courses.3.1">B</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.4.0">Introduction to AI and Logic Programming</span></span><span class="grade"><span data-edit="education.items.0.courses.4.1">B</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.5.0">Introduction to 3D Computer Graphics</span></span><span class="grade"><span data-edit="education.items.0.courses.5.1">B</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.6.0">Advanced Object-Oriented Programming</span></span><span class="grade top"><span data-edit="education.items.0.courses.6.1">A</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.7.0">Software Tools</span></span><span class="grade top"><span data-edit="education.items.0.courses.7.1">A</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.8.0">Computer Organization</span></span><span class="grade top"><span data-edit="education.items.0.courses.8.1">A</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.9.0">Elementary Probability</span></span><span class="grade top"><span data-edit="education.items.0.courses.9.1">A</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.10.0">Introduction to the Theory of Computation</span></span><span class="grade"><span data-edit="education.items.0.courses.10.1">B</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.11.0">Introduction to Object-Oriented Programming</span></span><span class="grade top"><span data-edit="education.items.0.courses.11.1">A</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.12.0">Introduction to Logic for Computer Science</span></span><span class="grade top"><span data-edit="education.items.0.courses.12.1">A</span></span></li><li><span class="cname"><span data-edit="education.items.0.courses.13.0">Discrete Math for Computer Science</span></span><span class="grade"><span data-edit="education.items.0.courses.13.1">B</span></span></li></ul>
           
         </article></div><button type="button" class="adm add-item" data-add="education.items">+ add school</button></div></section><section class="sec" id="certs" data-section="certs"><div class="adm sec-tools" data-sec="certs"><span>Certifications</span><button type="button" data-sact="up" aria-label="Move section up">↑</button><button type="button" data-sact="down" aria-label="Move section down">↓</button><button type="button" data-sact="toggle">hide</button></div>
