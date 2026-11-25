@@ -69,7 +69,11 @@
 :root[data-crt="full"] #crtScan,
 :root[data-crt="soft"] #crtVignette,
 :root[data-crt="full"] #crtVignette{display:block}
-:root[data-crt="soft"] #crtScan{opacity:.5}
+:root[data-crt="off"] #crtScan,
+:root[data-crt="off"] #crtVignette,
+:root[data-crt="off"] .crt-lines,
+:root[data-crt="off"] .crt-refresh{display:none!important}
+:root[data-crt="soft"] #crtScan{opacity:.72}
 :root[data-crt="soft"] #crtVignette{opacity:.55}
 :root[data-palette="light"][data-crt="full"] #crtScan{opacity:.4}
 :root[data-palette="light"][data-crt="soft"] #crtScan{opacity:.28}
