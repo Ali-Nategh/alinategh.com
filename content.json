@@ -373,7 +373,7 @@
                     ["C#", ""],
                     ["Java", ""],
                     ["SQL", ""],
-                    ["Javascript", ""],
+                    ["JavaScript", ""],
                     ["C", ""],
                     ["HTML / CSS", ""]
                 ]
@@ -574,7 +574,7 @@
         "linksLabel": "Hear more of my music",
         "links": [
             {
-                "id": "m1",
+                "id": "m0",
                 "label": "▶ Spotify · Ali Nategh",
                 "url": "https://open.spotify.com/artist/1CHSJfFKd4UCEoLyvLUkPx?si=vjbDSP1OQ8WdtowOOZJjeg&utm_source=copy-link"
             },

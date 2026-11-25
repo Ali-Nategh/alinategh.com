@@ -1,0 +1,9 @@
+/* Loaded on demand (studio, or the binary-note background). Not on the first-paint path. */
+@font-face {
+  font-family: "Noto Music";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/noto-music.woff2") format("woff2");
+  unicode-range: U+2669-266F, U+1D100-1D1FF;
+}

@@ -359,6 +359,9 @@
   }
   let queue = [], cur = null, speed = 1, lastAct = 'enter', lastPick = '';
   function plan() {
+    if (['music', 'pushups', 'coding', 'visit', 'wave'].includes(lastAct) && !document.hidden) {
+      dispatchEvent(new CustomEvent('mini:saw', { detail: lastAct }));
+    }
     if (reduce) { queue = [{ frames: ['idle0'], fd: 5000, reps: 1, face: 'in', at: narrow ? 'peek' : 'home' }]; return; }
     if (lastAct !== 'idle') { lastAct = 'idle'; queue = idleSeq(); return; }
     const opts = narrow ? ['visit', 'visit', 'narrowSwap'] : ['music', 'pushups', 'coding', 'peek', 'peekSwap', 'swap', 'swap'];
@@ -395,6 +398,14 @@
     const ax = Math.round(pos.x) - CX * S;
     left = Math.max(8 - ax, Math.min(vw - 8 - ax - w, left));
     bubble.style.left = left + 'px'; bubble.style.top = ((FY - 33) * S - h) + 'px';
+  }
+  function say(text) {
+    if (!text) return;
+    bubble.textContent = text;
+    bubble.hidden = false;
+    placeBubble();
+    clearTimeout(say.t);
+    say.t = setTimeout(hideBubble, 2800);
   }
   function wave() {
     if (!cur) return;
@@ -466,7 +477,11 @@
   addEventListener('resize', () => { const was = narrow; measure(); if (cur && !cur.p.move) pos.x = AT[cur.p.at && cur.p.at !== 'here' ? cur.p.at : (narrow ? 'peek' : 'home')](side); if (was !== narrow) { queue = []; lastAct = 'enter'; next(); } hitKey = ''; dirty = true; });
 
   // console easter egg: miniAli.do('pushups' | 'music' | 'coding' | 'peek' | 'swap'), miniAli.wave()
-  window.miniAli = { do(name) { const f = name === 'peekSwap' ? () => ACTIVITIES.peek(true) : ACTIVITIES[name]; if (!f || !cur) return Object.keys(ACTIVITIES); queue = f(); lastAct = name; cur.total = cur.t; return name; }, wave };
+  window.miniAli = {
+    do(name) { const f = name === 'peekSwap' ? () => ACTIVITIES.peek(true) : ACTIVITIES[name]; if (!f || !cur) return Object.keys(ACTIVITIES); queue = f(); lastAct = name; cur.total = cur.t; return name; },
+    wave,
+    say,
+  };
   // walk in from the edge a moment after the page loads
   queue = reduce ? [] : [{ frames: WALK, fd: 120, move: () => homeX(side), face: 'in' }];
   setTimeout(() => { if (reduce) pos.x = homeX(side); next(); run(); }, 1400);

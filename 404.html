@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <title>404 | Ali Nategh</title>
+        <meta name="description" content="This page left the hall. Mini Ali is still here, and so is a piano." />
+        <meta name="robots" content="noindex" />
+        <meta name="theme-color" content="#0a1124" />
+        <script>
+            /* wear the visitor's chosen theme before the first paint */
+            try { const t = JSON.parse(localStorage.getItem("an.theme") || "null"); if (typeof t === "string") document.documentElement.dataset.palette = t; } catch {}
+        </script>
+        <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/blend-192.png" />
+        <link rel="stylesheet" href="/css/fonts.css" />
+        <link rel="stylesheet" href="/css/main.css" />
+        <link rel="stylesheet" href="/css/mini.css" />
+        <link rel="stylesheet" href="/css/eggs.css" />
+        <link rel="stylesheet" href="/css/notfound.css" />
+        <script src="/js/achievements.js" defer></script>
+        <script src="/js/mini.js" defer></script>
+        <script src="/js/notfound.js" defer></script>
+        <script src="/js/console-hello.js" defer></script>
+    </head>
+    <body class="lost">
+        <main class="lost-card glass">
+            <p class="eyebrow"><b>~/</b>404</p>
+            <h1>This page <em>left the hall.</em></h1>
+            <p>
+                Nothing lives at this address. Mini Ali checked the wings.
+                The piano is still in tune, if you want to play him home.
+            </p>
+            <div class="piano lost-keys" id="lostKeys" aria-label="Playable piano keyboard, C4 to G5"></div>
+            <p class="lost-read" id="lostRead" aria-live="polite">—</p>
+            <p class="hint lost-hint">Click, tap or drag across the keys, or use <kbd>A</kbd>–<kbd>'</kbd> and <kbd>W</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>Y</kbd> <kbd>U</kbd> <kbd>O</kbd> <kbd>P</kbd>. The lost notes are C5 and F♯5.</p>
+            <div class="lost-actions">
+                <button class="btn" type="button" id="lostJingle">play the lost notes</button>
+                <a class="btn primary" href="/">back to the concert hall <span class="arrow" aria-hidden="true">→</span></a>
+            </div>
+        </main>
+    </body>
+</html>

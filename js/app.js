@@ -1029,7 +1029,7 @@
       <div class="piano-box">
         <div class="piano-head"><span>~/piano · C4–G5</span><span class="note-read" id="noteRead" aria-live="polite">—</span></div>
         <div class="piano" id="homePiano" aria-label="Playable piano keyboard"></div>
-        <div class="piano-actions"><button class="btn claret" type="button" id="riff">${T("music.phraseLabel")}</button><span class="name-notes" id="nameNotes" aria-hidden="true">${nameNotesHTML()}</span></div>
+        <div class="piano-actions"><button class="btn claret" type="button" id="riff">${T("music.phraseLabel")}</button><button class="btn" type="button" id="echoLaunch" title="Simon-style game on this piano">echo</button><span class="name-notes" id="nameNotes" aria-hidden="true">${nameNotesHTML()}</span></div>
         ${T("music.phraseHint", "p", "hint")}
         <p class="hint">Click, tap or drag across the keys. On a keyboard, use <kbd>A</kbd>–<kbd>'</kbd> for white keys and <kbd>W</kbd> <kbd>E</kbd> <kbd>T</kbd> <kbd>Y</kbd> <kbd>U</kbd> <kbd>O</kbd> <kbd>P</kbd> for black keys.</p>
       </div>
@@ -1064,7 +1064,7 @@
         const s = C.site,
             first = E(s.first.toLowerCase() || "me");
         $("#topbar").innerHTML = `
-    <a class="pill glass glow brand" href="#top" aria-label="${E(s.first + " " + s.last)}, back to top">
+    <a class="pill glass glow brand" href="#top">
       ${T("site.initials", "span", "brand-mark")}
       <span><b>${T("site.first")} <span class="sl">/</span> ${T("site.last")}</b>${T("site.tagline", "small")}</span></a>
     <div class="top-right">
@@ -1111,6 +1111,10 @@
         readColors();
         setSphereTags(C.sphere.tags);
         document.title = `${s.first} ${s.last} | Software Engineer`;
+        const homeEl = $("#home");
+        if (homeEl) homeEl.dataset.rev = contentRev(C);
+        document.dispatchEvent(new Event("site:render"));
+        startTypewriter();
     }
 
     /* glow follows the cursor on any card */
@@ -1172,7 +1176,7 @@
     let W = 0,
         H = 0;
     const DPR = Math.min(devicePixelRatio || 1, 2);
-    const small = matchMedia("(max-width:640px)").matches;
+    let small = matchMedia("(max-width:640px)").matches;
     const N = small ? 420 : 760,
         pts = [],
         GA = Math.PI * (3 - Math.sqrt(5));
@@ -1218,6 +1222,7 @@
         parX = 0,
         parY = 0;
     function resize() {
+        small = matchMedia("(max-width:640px)").matches;
         const r = cv.getBoundingClientRect();
         if (
             Math.round(r.width) === Math.round(W) &&
@@ -1295,6 +1300,29 @@
         kick();
     }).observe(cv);
     document.addEventListener("visibilitychange", kick);
+    /* shrink the label ring until the widest pill fits inside the canvas, then the draw loop clamps too */
+    function tagRadius(R) {
+        if (!W || !H || !tags.length) return R;
+        cx.font = `500 ${small ? 11 : 12}px "IBM Plex Mono", ui-monospace, monospace`;
+        let maxW = 48;
+        for (const tg of tags) maxW = Math.max(maxW, cx.measureText(tg.t).width + 16);
+        const roomX = Math.max(12, W / 2 - maxW / 2 - Math.abs(parX) * 24 - 4);
+        const roomY = Math.max(12, H / 2 - 16 - Math.abs(parY) * 18 - 4);
+        let peakX = 0.01, peakY = 0.01;
+        const cosp = Math.cos(rotX), sinp = Math.sin(rotX);
+        for (let i = 0; i < 24; i++) {
+            const a = (i / 24) * Math.PI * 2;
+            for (const tilt of [-0.55, 0, 0.55]) {
+                const x = Math.cos(a) * 1.42, z = Math.sin(a) * 1.42;
+                const y = Math.sin(a + tilt) * 0.32 + tilt * 0.4;
+                const y1 = y * cosp - z * sinp, z2 = y * sinp + z * cosp;
+                const persp = 2.6 / (2.6 + z2);
+                peakX = Math.max(peakX, Math.abs(x * persp));
+                peakY = Math.max(peakY, Math.abs(y1 * persp));
+            }
+        }
+        return Math.max(R * 0.45, Math.min(R, roomX / peakX, roomY / peakY));
+    }
     function frame(now) {
         if (!sphereVisible || document.hidden || $("#home").hidden) {
             rafOn = false;
@@ -1313,6 +1341,7 @@
         energy *= Math.pow(0.955, dt);
         cx.clearRect(0, 0, W, H);
         const R = Math.min(W, H) * 0.34,
+            tagR = tagRadius(R),
             ox = W / 2 + parX * 24,
             oy = H / 2 + parY * 18;
         const cy = Math.cos(rotY),
@@ -1375,17 +1404,20 @@
                 y = Math.sin(a + tg.tilt) * 0.32 + tg.tilt * 0.4;
             const y1 = y * cxr - z * sxr,
                 z2 = y * sxr + z * cxr,
-                persp = 2.6 / (2.6 + z2),
-                px = ox + x * R * persp,
-                py = oy + y1 * R * persp,
-                front = z2 < 0;
+                persp = 2.6 / (2.6 + z2);
+            const labelW = cx.measureText(tg.t).width + 14;
+            let px = ox + x * tagR * persp,
+                py = oy + y1 * tagR * persp;
+            const half = labelW / 2;
+            px = Math.max(half + 2, Math.min(W - half - 2, px));
+            py = Math.max(13, Math.min(H - 13, py));
+            const front = z2 < 0;
             const tc = tg.t === "♪" ? colC : colA;
             if (front) {
-                const w = cx.measureText(tg.t).width + 14;
                 cx.fillStyle = `rgba(${colP},.82)`;
                 cx.beginPath();
-                if (cx.roundRect) cx.roundRect(px - w / 2, py - 11, w, 22, 11);
-                else cx.rect(px - w / 2, py - 11, w, 22);
+                if (cx.roundRect) cx.roundRect(px - half, py - 11, labelW, 22, 11);
+                else cx.rect(px - half, py - 11, labelW, 22);
                 cx.fill();
                 cx.strokeStyle = `rgba(${tc},.4)`;
                 cx.stroke();
@@ -1720,14 +1752,25 @@
         o: 73,
         p: 75,
     };
-    function playHome(m, dur) {
+    function playHome(m, dur, source) {
         tone(m, dur, "piano");
         pulse();
         const p = $("#homePiano");
         if (p && p._light) p._light("h" + m);
         const nr = $("#noteRead");
-        if (nr) nr.textContent = noteName(m);
+        if (nr && source !== "echo") nr.textContent = noteName(m);
+        dispatchEvent(
+            new CustomEvent("piano:note", {
+                detail: {midi: m, source: source || "user"},
+            }),
+        );
     }
+    window.SitePiano = {
+        play(m, dur, source) {
+            playHome(m, dur == null ? 0.9 : dur, source || "user");
+        },
+        noteName,
+    };
     function onHomeKey(k, glide) {
         playHome(k.midi, glide ? 1 : 1.2);
     }
@@ -3173,7 +3216,7 @@
             )
                 return;
             const a = e.target.closest(
-                "a, [data-open-tty], [data-copy-email], #riff",
+                "a, [data-open-tty], [data-copy-email], #riff, #echoLaunch",
             );
             if (a) {
                 e.preventDefault();
@@ -3368,6 +3411,10 @@
             document.documentElement.dataset.palette = p;
         readColors();
         renderThemeMenu();
+        if (p && p !== applyPalette.last) {
+            applyPalette.last = p;
+            dispatchEvent(new CustomEvent("theme:used", {detail: p}));
+        }
     }
     function renderThemeMenu() {
         const m = $("#themeMenu");
@@ -3999,6 +4046,8 @@
         ],
         ["goto", "[section] scroll to a section"],
         ["sudo", "reboot · hire " + C.site.first.toLowerCase()],
+        ["trophies", "what you've found on this site"],
+        ["echo-game", "Simon on the piano, starting with my name"],
         ["clear", "clear the screen"],
         ["exit", "close the terminal (or press esc)"],
     ];
@@ -4141,6 +4190,7 @@ ${E(C.hero.bio.replace(/\*/g, ""))}`),
 ${E(C.music.body)}
 Type <span class="b">play</span> to hear my name, <span class="b">play 404</span> for a joke, or <span class="b">studio</span> to write your own.`),
         play: (a, raw) => {
+            if (a === "echo" || a === "echo-game") return startEchoGame();
             if (a) {
                 if (!playByName(a))
                     print(
@@ -4228,12 +4278,23 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
                     '<span class="a">Shutting down…</span> just kidding. Try <span class="b">sudo reboot</span>.',
                 );
             }
+            if (a.startsWith("hire")) {
+                if (window.Achievements) Achievements.unlock("sudo-hire");
+                return print(
+                    `<span class="c">[sudo] permission granted.</span> Great choice. Email: ${E(C.site.email)}`,
+                );
+            }
             print(
-                a.startsWith("hire")
-                    ? `<span class="c">[sudo] permission granted.</span> Great choice. Email: ${E(C.site.email)}`
-                    : `<span class="e">${me()} is not in the sudoers file. This incident will be reported.</span>`,
+                `<span class="e">${me()} is not in the sudoers file. This incident will be reported.</span>`,
             );
         },
+        trophies: () =>
+            print(
+                window.Achievements
+                    ? Achievements.report()
+                    : "trophies are not loaded.",
+            ),
+        "echo-game": () => startEchoGame(),
         clear: () => (out.innerHTML = ""),
         exit: () => closeTTY(),
         date: () => print(new Date().toString()),
@@ -4270,6 +4331,19 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
             print(
                 `zsh: command not found: ${E(cmd)}. Type <span class="b">help</span>.`,
             );
+    }
+    function startEchoGame() {
+        closeTTY();
+        if (location.hash === "#studio") location.hash = "music";
+        else {
+            const el = document.getElementById("music");
+            if (el)
+                el.scrollIntoView({
+                    behavior: reduce ? "auto" : "smooth",
+                    block: "center",
+                });
+        }
+        setTimeout(() => window.EchoGame && EchoGame.start(), 320);
     }
     function openTTY() {
         lastFocus = document.activeElement;
@@ -4326,6 +4400,10 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
     });
     tty.addEventListener("keydown", (e) => {
         if (e.key === "Escape") closeTTY();
+    });
+    addEventListener("ach:open", () => {
+        openTTY();
+        if (window.Achievements) print(Achievements.report());
     });
 
     /* ---------- global keyboard ---------- */
@@ -4498,6 +4576,7 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
         $("#home").hidden = studio;
         $("#studio").hidden = !studio;
         if (studio) {
+            loadMusicFont();
             if (!studioReady) {
                 studioReady = true;
                 buildPiano($("#sKeys"), STUDIO_KEYS, onStudioKey);
@@ -4545,12 +4624,72 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
         if (d && d.site) return {base: -1, content: d}; // older draft format: treat as out of date
         return null;
     }
+    let bootedPaint = false;
+    const capture = /[?&]prerender=1/.test(location.search);
+    function contentRev(obj) {
+        const c = clone(obj);
+        delete c.updatedAt;
+        const s = JSON.stringify(c);
+        let h = 2166136261;
+        for (let i = 0; i < s.length; i++) {
+            h ^= s.charCodeAt(i);
+            h = Math.imul(h, 16777619);
+        }
+        return (h >>> 0).toString(36);
+    }
+    function loadMusicFont() {
+        if (document.getElementById("musicFont")) return;
+        const link = document.createElement("link");
+        link.id = "musicFont";
+        link.rel = "stylesheet";
+        link.href = "css/music-font.css";
+        document.head.appendChild(link);
+    }
+    function startTypewriter() {
+        if (reduce || editing || capture) return;
+        const tEl = document.querySelector('#heroMain [data-edit="hero.cmd"]');
+        if (!tEl || tEl.dataset.typed === "1") return;
+        tEl.dataset.typed = "1";
+        const w = tEl.textContent;
+        tEl.textContent = "";
+        let i = 0;
+        const step = () => {
+            if (editing || !tEl.isConnected) return;
+            tEl.textContent = w.slice(0, ++i);
+            if (i < w.length) setTimeout(step, 90 + Math.random() * 80);
+        };
+        setTimeout(step, 400);
+    }
+    /* wire the piano, sphere and theme without rebuilding HTML that is already the published page */
+    function paintShell() {
+        applyPalette();
+        applyFavicon();
+        window.__miniCfg = clone(C.mini || {});
+        window.dispatchEvent(new Event("mini:config"));
+        const hp = $("#homePiano");
+        if (hp) buildPiano(hp, HOME_KEYS, onHomeKey);
+        if (editing) makeEditable();
+        readColors();
+        setSphereTags((C.sphere && C.sphere.tags) || []);
+        const s = C.site || {};
+        if (s.first) document.title = `${s.first} ${s.last} | Software Engineer`;
+        document.dispatchEvent(new Event("site:render"));
+        startTypewriter();
+    }
     function useContent(o) {
-        C = merge(DEFAULT, o);
+        const next = merge(DEFAULT, o);
+        const rev = contentRev(next);
+        const painted = ($("#home") && $("#home").dataset.rev) || "";
+        const same = bootedPaint && rev === contentRev(C);
+        C = next;
         saved = clone(C);
         if (!editing || !dirty) {
-            render();
-            if (editing) renderPanel();
+            if (!bootedPaint && painted === rev) paintShell();
+            else if (!same) {
+                render();
+                if (editing) renderPanel();
+            }
+            bootedPaint = true;
         }
         afterContentLoad();
     }
@@ -4592,25 +4731,10 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
         }
         if (serverObj) useContent(published);
     }
-    render();
     renderToolbar();
-    if (!reduce) {
-        const tEl = document.querySelector('#heroMain [data-edit="hero.cmd"]');
-        if (tEl) {
-            const w = tEl.textContent;
-            tEl.textContent = "";
-            let i = 0;
-            const step = () => {
-                if (editing) {
-                    tEl.textContent = w;
-                    return;
-                }
-                tEl.textContent = w.slice(0, ++i);
-                if (i < w.length) setTimeout(step, 90 + Math.random() * 80);
-            };
-            setTimeout(step, 400);
-        }
-    }
+    readColors();
+    const earlyPiano = $("#homePiano");
+    if (earlyPiano) buildPiano(earlyPiano, HOME_KEYS, onHomeKey);
     const contentReady = (
         location.protocol === "file:"
             ? Promise.reject(new Error("file"))
@@ -4626,14 +4750,26 @@ links     ${C.contact.links.map((l) => `<a href="${safeUrl(l.url)}" target="_bla
     ).then(
         (o) => applyLoaded(o),
         (err) => {
+            const kept = $("#home") && $("#home").dataset.rev;
             const why =
                 location.protocol === "file:"
                     ? "This page was opened as a file, so content.json cannot load. Serve the folder instead: run  python -m http.server 8000  in it, then open http://localhost:8000"
-                    : `content.json did not load (${err.message}), so the built-in content is showing.`;
+                    : kept
+                      ? `content.json did not load (${err.message}). Showing the copy saved in index.html.`
+                      : `content.json did not load (${err.message}), so the built-in content is showing.`;
             console.warn("[content] " + why);
             if (location.hash === "#admin") setTimeout(() => toast(why), 600);
             applyLoaded(null);
+            if (!bootedPaint) {
+                if ($("#home") && $("#home").dataset.rev) paintShell();
+                else render();
+                bootedPaint = true;
+            }
+            document.documentElement.dataset.boot = "done";
         },
     );
+    contentReady.then(() => {
+        document.documentElement.dataset.boot = "done";
+    });
     route();
 })();

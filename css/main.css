@@ -9,8 +9,8 @@
   --on-accent:#170f02;
   --paper:#f4eddd; --paper-2:#ebe2cd; --ink:#1a1f36; --ink-soft:#6b6a7a;
   --ok:#7fd6a4; --warn:#f0c264; --bad:#ff7a8a;
-  --display:"Fraunces","Iowan Old Style","Palatino Linotype",Georgia,serif;
-  --mono:"IBM Plex Mono","JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+  --display:"Fraunces","Fraunces Fallback","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --mono:"IBM Plex Mono","Plex Fallback",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --music:"Noto Music","Bravura Text","Segoe UI Symbol","Apple Symbols",serif;
   --r-lg:22px; --r-md:14px; --r-sm:10px;
   --sunk:rgba(0,0,0,.28); --sunk-2:rgba(0,0,0,.2); --hover-wash:rgba(255,255,255,.06); --chip-bg:rgba(255,255,255,.03);

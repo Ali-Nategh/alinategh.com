@@ -1,0 +1,23 @@
+/* The lost page. Shares the hall's colours from main.css and stands on its own at any URL. */
+body.lost { min-height: 100vh; display: grid; place-items: center; padding: 28px 16px 72px; }
+.lost-card {
+  width: min(640px, 100%);
+  padding: clamp(22px, 5vw, 40px);
+  display: grid;
+  gap: 16px;
+}
+.lost-card h1 {
+  font-family: var(--display);
+  font-weight: 560;
+  font-size: clamp(40px, 8vw, 68px);
+  line-height: .95;
+  letter-spacing: -.03em;
+}
+.lost-card h1 em { font-style: italic; font-weight: 500; color: var(--accent); }
+.lost-card p { color: var(--muted); }
+/* the keys themselves come from .piano / .wk / .bk in main.css, same as the home page */
+.lost-keys { height: 150px; }
+.lost-hint { font-size: 12px; color: var(--dim); }
+.lost-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.lost-actions .btn, .lost-actions button.btn { min-height: 44px; }
+.lost-read { min-height: 1.4em; color: var(--accent); font-size: 13px; }
